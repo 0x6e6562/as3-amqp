@@ -21,11 +21,13 @@ class(amqpclasses) ::= <<
 package org.amqp.methods
 {
     import org.amqp.Method;
+    import flash.utils.IDataInput;
+    <amqpclasses:import()>
 
     /**
      *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
      **/
-    class MethodReader
+    public class MethodReader
     {
         public static function readMethodFrom(input:IDataInput):Method {
 
@@ -35,11 +37,20 @@ package org.amqp.methods
 
 	      	switch (classId) {
 	            <amqpclasses:amqpclass()>
+	            
+	            default:return null;
 	      	}
 	    }  	
     }
 }    
 >>
+
+import() ::= <<
+<it.methods:class_import(); separator="\n">
+
+>>
+
+class_import() ::= "import org.amqp.methods.<it.amqpClass.name>.<it.name>;"
 
 amqpclass() ::= <<
 case <it.index>:

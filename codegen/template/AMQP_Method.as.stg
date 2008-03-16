@@ -21,8 +21,12 @@ class(method) ::= <<
 package org.amqp.methods.<method.amqpClass.name>
 {
     import org.amqp.Method;
+    import org.amqp.LongString;
 	import org.amqp.methods.ArgumentReader;
 	import org.amqp.methods.ArgumentWriter;
+	import org.amqp.methods.MethodArgumentReader;
+	import org.amqp.methods.MethodArgumentWriter;
+	import com.ericfeminella.utils.Map; 
 
     /**
      *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
@@ -54,6 +58,8 @@ headerclass(amqpclass) ::= <<
  **/
 package org.amqp.headers
 {
+    import com.ericfeminella.utils.Map;
+
     /**
      *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
      **/
@@ -115,13 +121,13 @@ override public function readArgumentsFrom(reader:MethodArgumentReader):void {
 >>
 
 
-readArgs() ::= "<it.name> = reader.<readMap.(it.type)>();"
+readArgs() ::= "_<it.name> = reader.<readMap.(it.type)>();"
 
-writeArgs() ::= "writer.<writeMap.(it.type)>(<it.name>);"	    	
+writeArgs() ::= "writer.<writeMap.(it.type)>(_<it.name>);"
 
-field() ::= "private var <it.name>:<typeMap.(it.type)>;"
+field() ::= "public var _<it.name>:<typeMap.(it.type)>;"
 
-public_field() ::= "public var <it.name>:<typeMap.(it.type)>;"
+public_field() ::= "public var _<it.name>:<typeMap.(it.type)>;"
 
 typeMap ::= [
         "shortstr":"String",
@@ -137,7 +143,7 @@ typeMap ::= [
 ]
 
 writeMap ::= [
-        "shortstr":"writeStringstr",
+        "shortstr":"writeShortstr",
         "longstr":"writeLongstr",
         "short":"writeShort",
         "long":"writeLong",
@@ -150,7 +156,7 @@ writeMap ::= [
 ]
 
 readMap ::= [
-        "shortstr":"readStringstr",
+        "shortstr":"readShortstr",
         "longstr":"readLongstr",
         "short":"readShort",
         "long":"readLong",

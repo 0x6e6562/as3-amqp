@@ -189,6 +189,11 @@ public class CodeGenerator {
             AMQPClass clazz = new AMQPClass();
 
             clazz.setName(ap1.evalXPathToString());
+
+            if (clazz.getName().equals("test")) {
+                continue;
+            }
+
             clazz.setIndex((int) ap2.evalXPathToNumber());
             List<Method> methods = new ArrayList<Method>();
             methods.addAll(bindMethods(nav, clazz, true));
@@ -268,7 +273,7 @@ public class CodeGenerator {
                 method.setName(Util.ToFirstUpper(methodName));
             }
 
-            method.setSynchronous(ap2.evalXPathToBoolean());
+            method.setSynchronous(ap2.evalXPathToBoolean() && synchronous);
             method.setHasContent(ap5.evalXPathToBoolean());
             method.setIndex((int) ap3.evalXPathToNumber());
             method.setFields(bindFlatObject(nav, Field.class, "field"));

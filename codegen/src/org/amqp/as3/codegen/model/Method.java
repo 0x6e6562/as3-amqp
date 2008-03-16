@@ -18,6 +18,10 @@ public class Method {
 
     private Method response;
 
+    public boolean renderResponse() {
+        return response != null && synchronous;
+    }
+
     public boolean isHasContent() {
         return hasContent;
     }

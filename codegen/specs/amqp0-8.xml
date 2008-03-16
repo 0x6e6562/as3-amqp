@@ -3607,7 +3607,7 @@ confirm transaction mode
     messages.
   </doc>
       <chassis name="server" implement="MAY"/>
-      <response name="sh"/>
+      <response name="start-ok"/>
       <field name="dtx identifier" type="shortstr">
     transaction identifier
     <doc>
