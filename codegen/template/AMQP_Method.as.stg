@@ -1,0 +1,163 @@
+group AS3_Method;
+
+class(method) ::= <<
+/**
+ * ---------------------------------------------------------------------------
+ *   Copyright (C) 2008 0x6e6562
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ---------------------------------------------------------------------------
+ **/
+package org.amqp.methods.<method.amqpClass.name>
+{
+    import org.amqp.Method;
+	import org.amqp.methods.ArgumentReader;
+	import org.amqp.methods.ArgumentWriter;
+
+    /**
+     *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
+     **/
+    public class <method.name> extends Method implements ArgumentReader, ArgumentWriter
+    {
+         <method:body(method)>
+    }
+}
+>>
+
+headerclass(amqpclass) ::= <<
+/**
+ * ---------------------------------------------------------------------------
+ *   Copyright (C) 2008 0x6e6562
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ---------------------------------------------------------------------------
+ **/
+package org.amqp.headers
+{
+    /**
+     *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
+     **/
+    public class <amqpclass.camelCaseName>Properties extends ContentHeader
+    {
+        <amqpclass.fields:public_field(); separator="\n">
+
+        override public function getClassId():int {
+            return <amqpclass.index>;
+        }
+
+        override public function readPropertiesFrom(reader:ContentHeaderPropertyReader):void{
+            <amqpclass.fields:readArgs(); separator="\n">
+        }
+
+        override public function writePropertiesTo(writer:ContentHeaderPropertyWriter):void{
+            <amqpclass.fields:writeArgs(); separator="\n">
+        }
+
+    }
+}
+>>
+
+
+body(meth) ::= <<
+<meth.fields:field(); separator="\n">
+
+override public function hasResponse():Boolean {
+    return null != getResponse();
+}
+
+<if(meth.hasContent)>
+override public function hasContent():Boolean {
+    return true;
+}
+<endif>
+
+<if(meth.synchronous)>
+override public function getResponse():Method {
+    return new <meth.response.name>();
+}
+<endif>
+
+override public function getClassId():int{
+    return <meth.amqpClass.index>;
+}
+
+override public function getMethodId():int{
+    return <meth.index>;
+}
+
+override public function writeArgumentsTo(writer:MethodArgumentWriter):void {
+    <meth.fields:writeArgs(); separator="\n">
+}
+
+override public function readArgumentsFrom(reader:MethodArgumentReader):void {
+    <meth.fields:readArgs(); separator="\n">
+}
+>>
+
+
+readArgs() ::= "<it.name> = reader.<readMap.(it.type)>();"
+
+writeArgs() ::= "writer.<writeMap.(it.type)>(<it.name>);"	    	
+
+field() ::= "private var <it.name>:<typeMap.(it.type)>;"
+
+public_field() ::= "public var <it.name>:<typeMap.(it.type)>;"
+
+typeMap ::= [
+        "shortstr":"String",
+        "longstr":"LongString",
+        "short":"int",
+        "long":"int",
+        "longlong":"uint",
+        "bit":"Boolean",
+        "table":"Map",
+        "octet":"int",
+        "timestamp":"Date",    
+        default:"null"
+]
+
+writeMap ::= [
+        "shortstr":"writeStringstr",
+        "longstr":"writeLongstr",
+        "short":"writeShort",
+        "long":"writeLong",
+        "longlong":"writeLonglong",
+        "bit":"writeBit",
+        "table":"writeTable",
+        "octet":"writeOctet",
+        "timestamp":"writeTimestamp",
+        default:"null"
+]
+
+readMap ::= [
+        "shortstr":"readStringstr",
+        "longstr":"readLongstr",
+        "short":"readShort",
+        "long":"readLong",
+        "longlong":"readLonglong",
+        "bit":"readBit",
+        "table":"readTable",
+        "octet":"readOctet",
+        "timestamp":"readTimestamp",
+        default:"null"
+]

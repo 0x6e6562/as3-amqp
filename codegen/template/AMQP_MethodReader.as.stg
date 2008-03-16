@@ -1,0 +1,61 @@
+group AS3_MethodReader;
+
+class(amqpclasses) ::= <<
+/**
+ * ---------------------------------------------------------------------------
+ *   Copyright (C) 2008 0x6e6562
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ---------------------------------------------------------------------------
+ **/
+package org.amqp.methods
+{
+    import org.amqp.Method;
+
+    /**
+     *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
+     **/
+    class MethodReader
+    {
+        public static function readMethodFrom(input:IDataInput):Method {
+
+			var classId:int = input.readShort();
+      		var methodId:int = input.readShort();
+      		var method:Method;
+
+	      	switch (classId) {
+	            <amqpclasses:amqpclass()>
+	      	}
+	    }  	
+    }
+}    
+>>
+
+amqpclass() ::= <<
+case <it.index>:
+    switch(methodId) {
+
+        <it.methods:amqpmethod()>
+
+    }
+    
+>>
+
+amqpmethod() ::= <<
+case <it.index>: {
+    method = new org.amqp.methods.<it.amqpClass.name>.<it.name>();
+	method.readArgumentsFrom(new MethodArgumentReader(input));
+    return method;
+}
+
+>>
