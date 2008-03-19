@@ -44,14 +44,13 @@ public class CodeGenerator {
 
         List<AMQPClass> classes = bindClasses(nav);
 
-        List<Constant> constants = bindConstants(nav);
+        writeConstants(nav);
 
-        InputStream is = readInputFile("AMQP_Constants.as.stg");
-        StringTemplateGroup constantsGroup = new StringTemplateGroup(new InputStreamReader(is), AngleBracketTemplateLexer.class);
-        StringTemplate constantsClass = constantsGroup.getInstanceOf("class");
-        constantsClass.setAttribute("constants", constants);
-
-        writeFile(baseDir, "AMQP", constantsClass.toString());
+        InputStream cdis = readInputFile("AMQP_CommandReceiver.as.stg");
+        StringTemplateGroup commandsGroup = new StringTemplateGroup(new InputStreamReader(cdis), AngleBracketTemplateLexer.class);
+        StringTemplate commandsClass = commandsGroup.getInstanceOf("class");
+        commandsClass.setAttribute("amqpclasses", classes);
+        writeFile(baseDir, "BaseCommandReceiver", commandsClass.toString());
         
         InputStream template = readInputFile("AMQP_Method.as.stg");
         StringTemplateGroup templates = new StringTemplateGroup(new InputStreamReader(template), AngleBracketTemplateLexer.class);
@@ -78,6 +77,15 @@ public class CodeGenerator {
 
         generateMethodReader("AMQP_MethodReader.as.stg", classes, methodsDir, "MethodReader");
 
+    }
+
+    private static void writeConstants(VTDNav nav) throws Exception {
+        List<Constant> constants = bindConstants(nav);
+        InputStream is = readInputFile("AMQP_Constants.as.stg");
+        StringTemplateGroup constantsGroup = new StringTemplateGroup(new InputStreamReader(is), AngleBracketTemplateLexer.class);
+        StringTemplate constantsClass = constantsGroup.getInstanceOf("class");
+        constantsClass.setAttribute("constants", constants);
+        writeFile(baseDir, "AMQP", constantsClass.toString());
     }
 
     private static void generateMethodReader(String template, List<AMQPClass> classes, String dir, String className) throws IOException {

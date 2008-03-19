@@ -17,41 +17,99 @@
  **/
 package org.amqp
 {
-	import flash.net.Socket;
-	import flash.events.ProgressEvent;
 	import flash.events.Event;
+	import flash.events.IOErrorEvent;
+	import flash.events.ProgressEvent;
+	import flash.net.Socket;
 	import flash.utils.ByteArray;
+	
+	import org.amqp.impl.ConnectionStateHandler;
 	import org.amqp.impl.SessionImpl;
 		
 	public class Connection
 	{				
+		private var shuttingDown:Boolean = false;
 		private var sock:Socket;
 		private var session0:Session;
-		private var sessionManager:SessionManager;
+		private var connectionState:ConnectionState;
+		public var sessionManager:SessionManager;
 		public var frameMax:int = 0;
 		
 		public function Connection(state:ConnectionState) {
-			session0 = new SessionImpl(this, 0);
+			connectionState = state;
+			var stateHandler:ConnectionStateHandler = new ConnectionStateHandler(state);
+
+			session0 = new SessionImpl(this, 0, stateHandler);
+			session0.addAfterCloseEventListener(afterGracefulClose);			
+			stateHandler.registerWithSession(session0);
+			
 			sessionManager = new SessionManager(this);
-			handshake(state);		
+			sock = new Socket();			
+			sock.addEventListener(Event.CONNECT, onSocketConnect);
+			sock.addEventListener(Event.CLOSE, onSocketClose);
+			sock.addEventListener(IOErrorEvent.IO_ERROR, onSocketError);
+			sock.addEventListener(ProgressEvent.SOCKET_DATA, onSocketData);		
 		}
 		
-		private function handshake(state:ConnectionState):void {			
-			sock = new Socket(state.serverhost, state.port);
-			sock.addEventListener(ProgressEvent.SOCKET_DATA, onSocketData);
-            sock.addEventListener(Event.CLOSE, onSocketClose);
-            var header:ByteArray = AMQP.generateHeader();
-            sock.writeBytes(header, 0, -1);	
+		public function get baseSession():Session {
+			return session0;
 		}
 		
-		public function onSocketClose(event:Event):void {
-			trace("Socket closed, do something about this");
+		public function start():void {
+			sock.connect(connectionState.serverhost, connectionState.port);
+		}				
+        
+        public function onSocketConnect(event:Event):void {
+        	var header:ByteArray = AMQP.generateHeader();
+            sock.writeBytes(header, 0, header.length);
+        }
+        
+        public function onSocketClose(event:Event):void {        	
+			handleForcedShutdown();
 		}
 		
+		public function onSocketError(event:IOErrorEvent):void {
+			trace(event.text);
+		}
+        
+        public function close(reason:Object = null):void {
+        	if (!shuttingDown) {        	
+	        	if (sock.connected) {
+	        		handleGracefulShutdown();	        		
+	        	}
+	        	else {
+	        		handleForcedShutdown();
+	        	}
+        	}
+        }
+        
+        public function afterGracefulClose(event:Event):void {
+        	sock.close();
+        }
+				
 		/**
 		 * Socket timeout waiting for a frame. Maybe missed heartbeat.
 		 **/
 		public function handleSocketTimeout():void {
+			handleForcedShutdown();
+		}
+		
+		private function handleForcedShutdown():void {
+			if (!shuttingDown) {
+				shuttingDown = true;
+				trace("Calling handleForcedShutdown from connection");
+				sessionManager.forceClose();
+				session0.forceClose();
+			}
+		}
+		
+		private function handleGracefulShutdown():void {
+			if (!shuttingDown) {
+				shuttingDown = true;
+				trace("Calling handleGracefulShutdown from connection, so = " + sock.connected);
+				sessionManager.closeGracefully();
+				session0.closeGracefully();
+			}
 		}
 		
 		/**
@@ -59,7 +117,7 @@ package org.amqp
 		 * by a frame handler.
 		 **/ 
 		public function onSocketData(event:Event):void {
-			while (sock.bytesAvailable > 0) {
+			while (sock.connected && sock.bytesAvailable > 0) {
 				var frame:Frame = parseFrame(sock);
 				maybeSendHeartbeat();
 				if (frame != null) {
@@ -89,9 +147,17 @@ package org.amqp
                 frame.writeTo(sock);
                 //lastActivityTime = new Date().valueOf();
             } else {
-                throw new Error("AMQConnection main loop not running");
+                throw new Error("Connection main loop not running");
             }
         }
+        
+        public function addSocketEventListener(type:String, listener:Function):void {
+			sock.addEventListener(type, listener);
+		}
+		
+		public function removeSocketEventListener(type:String, listener:Function):void {
+			sock.removeEventListener(type, listener);
+		}
         
         private function maybeSendHeartbeat():void {}
 	}

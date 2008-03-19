@@ -1,0 +1,102 @@
+group AS3_MethodReader;
+
+class(amqpclasses) ::= <<
+/**
+ * ---------------------------------------------------------------------------
+ *   Copyright (C) 2008 0x6e6562
+ *
+ *   Licensed under the Apache License, Version 2.0 (the "License");
+ *   you may not use this file except in compliance with the License.
+ *   You may obtain a copy of the License at
+ *
+ *       http://www.apache.org/licenses/LICENSE-2.0
+ *
+ *   Unless required by applicable law or agreed to in writing, software
+ *   distributed under the License is distributed on an "AS IS" BASIS,
+ *   WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ *   See the License for the specific language governing permissions and
+ *   limitations under the License.
+ * ---------------------------------------------------------------------------
+ **/
+package org.amqp
+{
+    import org.amqp.Method;
+    import org.amqp.Session;
+    import org.amqp.Command;
+    import flash.utils.IDataInput;
+
+    /**
+     *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
+     **/
+    public class BaseCommandReceiver implements CommandReceiver
+    {
+        protected var session:Session;
+
+        public function registerWithSession(s:Session):void {
+			session = s;
+		}
+
+        public function forceClose():void{}
+
+        public function closeGracefully():void{}
+
+        public function addAfterOpenEventListener(callback:Function):void{}
+
+		public function removeAfterOpenEventListener(callback:Function):void{}
+
+		public function addAfterCloseEventListener(callback:Function):void{}
+
+		public function removeAfterCloseEventListener(callback:Function):void{}
+
+        public function receive(cmd:Command):void {
+
+	      	switch (cmd.method.getClassId()) {
+	            <amqpclasses:amqpclass()>
+	            
+	            default:break;
+	      	}
+	    }  	
+
+	    <amqpclasses:method()>
+    }
+}    
+>>
+
+
+
+amqpclass() ::= <<
+case <it.index>:
+    switch(cmd.method.getMethodId()) {
+
+        <it.methods:amqpmethod()>
+
+    }
+
+>>
+
+
+amqpmethod() ::= <<
+case <it.index>: {
+    on<it.amqpClass.camelCaseName><it.name>(cmd);
+    break;
+}
+<if(it.hasResponse)>
+case <it.response.index>: {
+    on<it.amqpClass.camelCaseName><it.response.name>(cmd);
+    break;
+}
+<endif>
+
+>>
+
+method() ::= <<
+<it.methods:method_impl(); separator="\n">
+
+>>
+
+method_impl() ::= <<
+public function on<it.amqpClass.camelCaseName><it.name>(cmd:Command):void {}
+<if(it.hasResponse)>
+public function on<it.amqpClass.camelCaseName><it.response.name>(cmd:Command):void {}
+<endif>
+>>

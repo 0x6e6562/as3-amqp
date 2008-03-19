@@ -38,7 +38,7 @@ package org.amqp.methods
 	      	switch (classId) {
 	            <amqpclasses:amqpclass()>
 	            
-	            default:return null;
+	            default:throw new Error("Could not resolve method: classid = " + classId + ", methodid = " + methodId);
 	      	}
 	    }  	
     }
@@ -68,5 +68,13 @@ case <it.index>: {
 	method.readArgumentsFrom(new MethodArgumentReader(input));
     return method;
 }
+
+<if(it.hasResponse)>
+case <it.response.index>: {
+    method = new org.amqp.methods.<it.amqpClass.name>.<it.response.name>();
+	method.readArgumentsFrom(new MethodArgumentReader(input));
+    return method;
+}
+<endif>
 
 >>

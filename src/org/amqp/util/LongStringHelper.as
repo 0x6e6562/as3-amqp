@@ -15,25 +15,18 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp
+package org.amqp.util
 {
-	public interface Session
-	{
-		function closeGracefully():void;
-		
-		function forceClose():void;
-		
-		function sendCommand(c:Command):void;
-		
-		function handleFrame(frame:Frame):void;
-		
-		function addAfterOpenEventListener(callback:Function):void;
-		
-		function removeAfterOpenEventListener(callback:Function):void;
-		
-		function addAfterCloseEventListener(callback:Function):void;
-		
-		function removeAfterCloseEventListener(callback:Function):void;
-		
-	}
+    import flash.utils.ByteArray;
+    import org.amqp.LongString;
+    import org.amqp.impl.ByteArrayLongString;
+    
+    public class LongStringHelper
+    {
+        public static function asLongString(str:String):LongString {
+            var b:ByteArray = new ByteArray();
+            b.writeUTFBytes(str);
+            return new ByteArrayLongString(b);
+        }
+    }
 }

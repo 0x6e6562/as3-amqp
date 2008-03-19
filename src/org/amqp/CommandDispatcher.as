@@ -15,17 +15,10 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp.impl
+package org.amqp
 {
-	import flash.events.Event;
-	import org.amqp.AmqpEventHandler;
-
-	public class SimpleAmqpEventHandler implements AmqpEventHandler
+	public interface CommandDispatcher
 	{
-		public function onConnectionStart(event:Event)
-		{
-
-		}
-		
+		function dispatch(cmd:Command):void;	
 	}
 }

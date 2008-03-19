@@ -17,14 +17,16 @@
  **/
 package org.amqp
 {
-	import com.ericfeminella.utils.Map;
-	import com.ericfeminella.utils.HashMap;
+	import de.polygonal.ds.HashMap;
+	import de.polygonal.ds.Iterator;
+	
 	import org.amqp.impl.SessionImpl;
+	import org.amqp.impl.SessionStateHandler;
 	
 	public class SessionManager
 	{
 		private var connection:Connection;
-		private var sessions:Map = new HashMap();
+		private var sessions:HashMap = new HashMap();
 		private var nextChannel:int = 1;
 		
 		public function SessionManager(con:Connection) {
@@ -32,20 +34,42 @@ package org.amqp
 		}
 		
 		public function lookup(channel:int):Session {
-			// TODO look into to not being to use an int as a key
-			return sessions.getValue(channel+"") as Session;
+			return sessions.find(channel) as Session;
 		}
 		
-		public function create():Session {
+		public function create(stateHandler:SessionStateHandler = null):SessionStateHandler {
 			var channel:int = allocateChannelNumber();
-			var session:Session = new SessionImpl(connection, channel);
-			// TODO look into to not being to use an int as a key
-			sessions.put(channel +"", session);
-			return session;		
+			
+			if (null == stateHandler) {
+				stateHandler = new SessionStateHandler();
+			}
+			
+			var session:Session = new SessionImpl(connection, channel, stateHandler);
+			stateHandler.registerWithSession(session);
+			sessions.insert(channel, session);
+			return stateHandler;		
 		}
 		
 		private function allocateChannelNumber():int {
 			return nextChannel++;	
+		}
+		
+		public function closeGracefully():void {
+        	var it:Iterator = sessions.getIterator();
+			while (it.hasNext()) {
+				var session:Session = it.next() as Session;
+				session.closeGracefully();
+			}
+			sessions.clear();
+        }
+		
+		public function forceClose():void {
+			var it:Iterator = sessions.getIterator();
+			while (it.hasNext()) {
+				var session:Session = it.next() as Session;
+				session.forceClose();
+			}
+			sessions.clear();
 		}
 	}
 }

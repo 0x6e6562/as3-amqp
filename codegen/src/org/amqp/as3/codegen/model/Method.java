@@ -12,11 +12,17 @@ public class Method {
 
     private boolean hasContent = false;
 
+    private boolean hasResponse = false;
+
     private boolean synchronous;
 
     private List<Field> fields;
 
     private Method response;
+
+    public boolean isHasResponse() {
+        return hasResponse;
+    }
 
     public boolean renderResponse() {
         return response != null && synchronous;
@@ -43,6 +49,7 @@ public class Method {
     }
 
     public void setResponse(Method response) {
+        if (null != response) hasResponse = true;
         this.response = response;
     }
 
