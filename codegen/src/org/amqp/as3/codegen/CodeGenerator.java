@@ -50,7 +50,7 @@ public class CodeGenerator {
         StringTemplateGroup commandsGroup = new StringTemplateGroup(new InputStreamReader(cdis), AngleBracketTemplateLexer.class);
         StringTemplate commandsClass = commandsGroup.getInstanceOf("class");
         commandsClass.setAttribute("amqpclasses", classes);
-        writeFile(baseDir, "BaseCommandReceiver", commandsClass.toString());
+        writeFile(baseDir, "GeneratedCommandReceiver", commandsClass.toString());
         
         InputStream template = readInputFile("AMQP_Method.as.stg");
         StringTemplateGroup templates = new StringTemplateGroup(new InputStreamReader(template), AngleBracketTemplateLexer.class);

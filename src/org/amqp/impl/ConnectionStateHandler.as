@@ -20,14 +20,12 @@ package org.amqp.impl
 	import com.ericfeminella.utils.HashMap;
 	import com.ericfeminella.utils.Map;
 	
-	import flash.events.Event;
 	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
 	
-	import org.amqp.BaseCommandReceiver;
 	import org.amqp.Command;
 	import org.amqp.ConnectionState;
-	import org.amqp.Session;
+	import org.amqp.GeneratedCommandReceiver;
 	import org.amqp.methods.connection.Close;
 	import org.amqp.methods.connection.CloseOk;
 	import org.amqp.methods.connection.Open;
@@ -52,7 +50,7 @@ package org.amqp.impl
 	 * 5. Send connection.Open
 	 * 6. Receive connection.OpenOk
 	 **/
-	public class ConnectionStateHandler extends BaseCommandReceiver
+	public class ConnectionStateHandler extends GeneratedCommandReceiver
 	{
 		private static const STATE_CLOSED:int = 0;
 		private static const STATE_OPEN:int = 1;
@@ -68,7 +66,7 @@ package org.amqp.impl
 		public function ConnectionStateHandler(constate:ConnectionState){
 			connectionState = constate;
 		}
-		
+		/*
 		override public function addAfterOpenEventListener(callback:Function):void {
 			dispatcher.addEventListener(OPENED_EVENT,callback);
 		}
@@ -84,6 +82,7 @@ package org.amqp.impl
 		override public function removeAfterCloseEventListener(callback:Function):void {
 			dispatcher.removeEventListener(CLOSED_EVENT,callback);
 		}
+		*/
 		
 		
 		override public function forceClose():void {
@@ -173,7 +172,7 @@ package org.amqp.impl
 		private function send(cmd:Command):void {
 			session.sendCommand(cmd);
 		}
-		
+		/*
 		private function dispatchAfterOpenEvent():void {
 			dispatcher.dispatchEvent(new Event(OPENED_EVENT));
 		}
@@ -181,5 +180,6 @@ package org.amqp.impl
 		private function dispatchAfterCloseEvent():void {
 			dispatcher.dispatchEvent(new Event(CLOSED_EVENT));
 		}
+		*/
 	}
 }

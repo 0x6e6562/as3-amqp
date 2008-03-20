@@ -28,27 +28,10 @@ package org.amqp
     /**
      *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
      **/
-    public class BaseCommandReceiver implements CommandReceiver
+    public class GeneratedCommandReceiver extends BaseCommandReceiver
     {
-        protected var session:Session;
-
-        public function registerWithSession(s:Session):void {
-			session = s;
-		}
-
-        public function forceClose():void{}
-
-        public function closeGracefully():void{}
-
-        public function addAfterOpenEventListener(callback:Function):void{}
-
-		public function removeAfterOpenEventListener(callback:Function):void{}
-
-		public function addAfterCloseEventListener(callback:Function):void{}
-
-		public function removeAfterCloseEventListener(callback:Function):void{}
-
-        public function receive(cmd:Command):void {
+        
+        override public function receive(cmd:Command):void {
 
 	      	switch (cmd.method.getClassId()) {
 	            <amqpclasses:amqpclass()>
@@ -77,13 +60,11 @@ case <it.index>:
 
 amqpmethod() ::= <<
 case <it.index>: {
-    on<it.amqpClass.camelCaseName><it.name>(cmd);
-    break;
+    return on<it.amqpClass.camelCaseName><it.name>(cmd);
 }
 <if(it.hasResponse)>
 case <it.response.index>: {
-    on<it.amqpClass.camelCaseName><it.response.name>(cmd);
-    break;
+    return on<it.amqpClass.camelCaseName><it.response.name>(cmd);
 }
 <endif>
 

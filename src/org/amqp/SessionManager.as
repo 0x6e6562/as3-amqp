@@ -47,6 +47,9 @@ package org.amqp
 			var session:Session = new SessionImpl(connection, channel, stateHandler);
 			stateHandler.registerWithSession(session);
 			sessions.insert(channel, session);
+			
+			var s:Session = sessions.find(channel);
+			
 			return stateHandler;		
 		}
 		

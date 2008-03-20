@@ -17,10 +17,12 @@
  **/
 package org.amqp.impl
 {
-	import de.polygonal.ds.Iterator;
-	import de.polygonal.ds.PriorityQueue;
+	//import de.polygonal.ds.Iterator;
+	//import de.polygonal.ds.PriorityQueue;
 	
-	import org.amqp.BaseCommandReceiver;
+	import mx.managers.layoutClasses.PriorityQueue;
+	
+	import org.amqp.GeneratedCommandReceiver;
 	import org.amqp.Command;
 	import org.amqp.CommandDispatcher;
 	import org.amqp.Method;
@@ -31,7 +33,7 @@ package org.amqp.impl
 	import org.amqp.methods.access.Request;
 	import org.amqp.methods.access.RequestOk;
 
-	public class SessionStateHandler extends BaseCommandReceiver implements CommandDispatcher
+	public class SessionStateHandler extends GeneratedCommandReceiver implements CommandDispatcher
 	{		
 		private static const STATE_CLOSED:int = 0;
 		
@@ -39,12 +41,9 @@ package org.amqp.impl
 		private static const STATE_CHANNEL:int = new ChannelProperties().getClassId();
 		private static const STATE_ACCESS:int = new AccessProperties().getClassId();
 		
-		
-		//protected var realm:String;
 		protected var ticket:int;		
 		protected var state:int = STATE_CONNECTION;
-		protected var queueSize:int = 100;
-		protected var queue:PriorityQueue = new PriorityQueue(queueSize);
+		protected var queue:PriorityQueue = new PriorityQueue();
 		
 		public function SessionStateHandler(){
 		}
@@ -66,37 +65,31 @@ package org.amqp.impl
 					if (cmd.method.getClassId() > STATE_CHANNEL) {
 						enqueueCommand(cmd);
 					}
+					else {
+						sendCommand(cmd);
+					}
+					break;
 				}
 				case STATE_CHANNEL: {
 					if (cmd.method.getClassId() > STATE_ACCESS) {
 						enqueueCommand(cmd);
 					}
+					else {
+						sendCommand(cmd);
+					}
+					break;
 				}
 				default: {
-					flushQueue();
-					session.sendCommand(cmd);
+					flushQueue(state);
+					sendCommand(cmd);
 				}
 			}										
 		}
 		
 		override public function onChannelOpenOk(cmd:Command):void {
-			transition(STATE_CHANNEL);			
-			var accessRequest:Request = new Request();			
-			var it:Iterator = queue.getIterator();
-			while (it.hasNext()) {
-				var c:Command = it.next() as Command;		
-				var method:Method = c.method;		
-				if (method.getMethodId() == accessRequest.getMethodId() &&
-					method.getClassId() == accessRequest.getClassId()) {
-					if (queue.remove(c)) {
-						dispatch(cmd);
-					}		
-					else {
-						throw new Error("Could not remove " + method.getMethodId() + " from q");
-					}
-				}
-				
-			}			
+			transition(STATE_CHANNEL);
+			flushQueue(STATE_ACCESS);			
+			dispatchAfterOpenEvent();			
 		}
 		
 		override public function onAccessRequestOk(cmd:Command):void {
@@ -111,22 +104,41 @@ package org.amqp.impl
 		override public function onChannelCloseOk(cmd:Command):void {
 			ticket = -1;
 			transition(STATE_CONNECTION);
+			dispatchAfterCloseEvent();
 		}
 		
 		/**
 		 * Enqueues a command in order of ascending class id.
 		 **/
 		private function enqueueCommand(cmd:Command):void {
-			if ( !queue.enqueue(cmd) ) {
-				throw new Error("Priority queue size exhausted, maybe you should reallocate?");
+			queue.addObject(cmd, cmd.method.getClassId());
+		}
+		
+		private function flushQueue(limit:int):void {
+			
+			var cmd:Command = queue.removeSmallest() as Command;
+			var classId:int = cmd.method.getClassId();	
+						
+			if (classId > limit) {
+				queue.addObject(cmd, classId);
+			}
+			else {
+				sendCommand(cmd);
+				flushQueue(limit);
 			}
 		}
 		
-		private function flushQueue():void {
-			while (!queue.isEmpty()) {
-				var cmd:Command = queue.dequeue() as Command;
-				
+		private function sendCommand(cmd:Command):void {
+			var method:Method = cmd.method;
+			if (method.getClassId() > STATE_ACCESS) {
+				method._ticket = ticket;
+				trace("--------> " + method.getMethodId());
+				trace("--------> " + method._ticket);
+				session.sendCommand(cmd);
 			}
+			else {
+				session.sendCommand(cmd);
+			}	
 		}
 		
 		/**
@@ -142,6 +154,7 @@ package org.amqp.impl
 					else {
 						state = newState;
 					}
+					break;
 				}
 				case STATE_ACCESS: {
 					if (newState == STATE_CHANNEL) {
@@ -150,6 +163,7 @@ package org.amqp.impl
 					else {
 						state = newState;
 					}
+					break;
 				}
 				default: state = newState;
 			}
@@ -159,7 +173,7 @@ package org.amqp.impl
 		 * Renders an error according to the attempted transition.
 		 **/
 		private function stateError(newState:int):void {
-			throw new IllegalStateError(state + " ---> " + newState)	
+			throw new IllegalStateError("Illegal state transition: " + state + " ---> " + newState)	
 		}
 	}
 }

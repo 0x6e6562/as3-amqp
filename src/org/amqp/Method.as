@@ -21,7 +21,7 @@ package org.amqp
 	import org.amqp.methods.MethodArgumentReader;
 	import flash.events.Event;
 	
-    public class Method
+    public dynamic class Method
     {
         public function writeArgumentsTo(writer:MethodArgumentWriter):void {}
 

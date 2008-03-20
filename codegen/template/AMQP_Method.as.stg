@@ -26,7 +26,10 @@ package org.amqp.methods.<method.amqpClass.name>
 	import org.amqp.methods.ArgumentWriter;
 	import org.amqp.methods.MethodArgumentReader;
 	import org.amqp.methods.MethodArgumentWriter;
-	import com.ericfeminella.utils.Map; 
+	import com.ericfeminella.utils.Map;
+	import com.ericfeminella.utils.HashMap;
+	import org.amqp.impl.ByteArrayLongString;
+	import flash.utils.ByteArray;
 
     /**
      *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
@@ -125,7 +128,7 @@ readArgs() ::= "_<it.name> = reader.<readMap.(it.type)>();"
 
 writeArgs() ::= "writer.<writeMap.(it.type)>(_<it.name>);"
 
-field() ::= "public var _<it.name>:<typeMap.(it.type)>;"
+field() ::= "public var _<it.name>:<typeMap.(it.type)> = <defaultsMap.(it.type)>;"
 
 public_field() ::= "public var _<it.name>:<typeMap.(it.type)>;"
 
@@ -139,6 +142,19 @@ typeMap ::= [
         "table":"Map",
         "octet":"int",
         "timestamp":"Date",    
+        default:"null"
+]
+
+defaultsMap ::= [
+        "shortstr":"\"\"",
+        "longstr":"new ByteArrayLongString(new ByteArray())",
+        "short":"0",
+        "long":"0",
+        "longlong":"0",
+        "bit":"false",
+        "table":"new HashMap()",
+        "octet":"0",
+        "timestamp":"new Date()",
         default:"null"
 ]
 
