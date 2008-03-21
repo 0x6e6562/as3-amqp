@@ -22,30 +22,34 @@ package org.amqp.impl
 	
 	import mx.managers.layoutClasses.PriorityQueue;
 	
-	import org.amqp.GeneratedCommandReceiver;
+	import org.amqp.BaseCommandReceiver;
 	import org.amqp.Command;
-	import org.amqp.CommandDispatcher;
 	import org.amqp.Method;
+	import org.amqp.ProtocolEvent;
 	import org.amqp.error.IllegalStateError;
 	import org.amqp.headers.AccessProperties;
 	import org.amqp.headers.ChannelProperties;
 	import org.amqp.headers.ConnectionProperties;
-	import org.amqp.methods.access.Request;
 	import org.amqp.methods.access.RequestOk;
+	import org.amqp.methods.channel.CloseOk;
+	import org.amqp.methods.channel.OpenOk;
 
-	public class SessionStateHandler extends GeneratedCommandReceiver implements CommandDispatcher
+	public class SessionStateHandler extends BaseCommandReceiver
 	{		
-		private static const STATE_CLOSED:int = 0;
-		
+		private static const STATE_CLOSED:int = 0;		
 		private static const STATE_CONNECTION:int = new ConnectionProperties().getClassId();
 		private static const STATE_CHANNEL:int = new ChannelProperties().getClassId();
 		private static const STATE_ACCESS:int = new AccessProperties().getClassId();
+		private static const STATE_OPEN:int = new AccessProperties().getClassId() + 1;
 		
 		protected var ticket:int;		
 		protected var state:int = STATE_CONNECTION;
 		protected var queue:PriorityQueue = new PriorityQueue();
 		
 		public function SessionStateHandler(){
+			addEventListener(new OpenOk(), onOpenOk);
+			addEventListener(new RequestOk(), onRequestOk);
+			addEventListener(new CloseOk(), onCloseOk);
 		}
 		
 		override public function forceClose():void{
@@ -80,31 +84,32 @@ package org.amqp.impl
 					break;
 				}
 				default: {
-					flushQueue(state);
+					flushQueue();
 					sendCommand(cmd);
 				}
 			}										
 		}
 		
-		override public function onChannelOpenOk(cmd:Command):void {
+		public function onOpenOk(event:ProtocolEvent):void {
 			transition(STATE_CHANNEL);
 			flushQueue(STATE_ACCESS);			
-			dispatchAfterOpenEvent();			
+			//dispatchAfterOpenEvent();			
 		}
 		
-		override public function onAccessRequestOk(cmd:Command):void {
-			var accessRequestOk:RequestOk = cmd.method as RequestOk;
+		public function onRequestOk(event:ProtocolEvent):void {
+			transition(STATE_ACCESS);
+			var accessRequestOk:RequestOk = event.command.method as RequestOk;
 			ticket = accessRequestOk._ticket;
-			transition(STATE_ACCESS);	
+			flushQueue();			
 		}
 		
 		/**
 		 *  This frees up any resources associated with this session.
 		 **/
-		override public function onChannelCloseOk(cmd:Command):void {
+		public function onCloseOk(event:ProtocolEvent):void {
 			ticket = -1;
 			transition(STATE_CONNECTION);
-			dispatchAfterCloseEvent();
+			//dispatchAfterCloseEvent();
 		}
 		
 		/**
@@ -114,18 +119,25 @@ package org.amqp.impl
 			queue.addObject(cmd, cmd.method.getClassId());
 		}
 		
-		private function flushQueue(limit:int):void {
+		private function flushQueue(limit:int = -1):void {
 			
 			var cmd:Command = queue.removeSmallest() as Command;
+			if (null == cmd) return;
 			var classId:int = cmd.method.getClassId();	
-						
-			if (classId > limit) {
-				queue.addObject(cmd, classId);
+			
+			if (limit > -1) {
+				if (classId > limit) {
+					queue.addObject(cmd, classId);
+				}
+				else {
+					sendCommand(cmd);
+					flushQueue(limit);
+				}
 			}
 			else {
 				sendCommand(cmd);
-				flushQueue(limit);
-			}
+				flushQueue();
+			}										
 		}
 		
 		private function sendCommand(cmd:Command):void {

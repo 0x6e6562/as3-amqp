@@ -43,12 +43,8 @@ package org.amqp
 		
 		function registerWithSession(s:Session):void;
 		
-		function addAfterOpenEventListener(callback:Function):void;
+		function addEventListener(method:Method, callback:Function):void;
 		
-		function removeAfterOpenEventListener(callback:Function):void;
-		
-		function addAfterCloseEventListener(callback:Function):void;
-		
-		function removeAfterCloseEventListener(callback:Function):void;
+		function removeEventListener(method:Method, callback:Function):void;
 	}
 }

@@ -17,32 +17,21 @@
  **/
 package org.amqp
 {
-	import flash.events.EventDispatcher;
-	
-	public class BaseCommandReceiver implements CommandReceiver
-	{	
-		private var dispatcher:EventDispatcher = new EventDispatcher();
-    	
-        protected var session:Session;
+	import flash.events.Event;
 
-        public function registerWithSession(s:Session):void {
-			session = s;
-		}
-
-        public function forceClose():void{}
-
-        public function closeGracefully():void{}
+	public class ProtocolEvent extends Event
+	{		
+		public var command:Command;
 		
-		public function addEventListener(method:Method, fun:Function):void {
-			dispatcher.addEventListener(ProtocolEvent.eventType(method), fun);
+		public function ProtocolEvent(cmd:Command)
+		{
+			super(eventType(cmd.method));
+			command = cmd;
 		}
 		
-		public function removeEventListener(method:Method, fun:Function):void {
-			dispatcher.removeEventListener(ProtocolEvent.eventType(method), fun);
+		public static function eventType(method:Method):String {
+			return method.getClassId() + "" + method.getMethodId();
 		}
 		
-		public function receive(cmd:Command):void {			
-			dispatcher.dispatchEvent(new ProtocolEvent(cmd));
-		}
 	}
 }

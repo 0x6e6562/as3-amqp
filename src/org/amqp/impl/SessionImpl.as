@@ -21,6 +21,7 @@ package org.amqp.impl
 	import org.amqp.CommandReceiver;
 	import org.amqp.Connection;
 	import org.amqp.Frame;
+	import org.amqp.Method;
 	import org.amqp.Session;
 
 	public class SessionImpl implements Session
@@ -59,19 +60,12 @@ package org.amqp.impl
 			commandReceiver.forceClose();
 		}
 		
-		public function addAfterOpenEventListener(callback:Function):void {
-			commandReceiver.addAfterOpenEventListener(callback);
+		public function addEventListener(method:Method, fun:Function):void {
+			commandReceiver.addEventListener(method, fun);	
 		}
 		
-		public function removeAfterOpenEventListener(callback:Function):void{
-			commandReceiver.removeAfterOpenEventListener(callback);
-		}		
-		
-		public function addAfterCloseEventListener(callback:Function):void{
-			commandReceiver.addAfterCloseEventListener(callback);
-		}		
-		public function removeAfterCloseEventListener(callback:Function):void{
-			commandReceiver.removeAfterCloseEventListener(callback);
+		public function removeEventListener(method:Method, fun:Function):void {
+			commandReceiver.removeEventListener(method, fun);	
 		}
 	}
 }

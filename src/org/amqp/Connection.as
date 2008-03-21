@@ -25,6 +25,7 @@ package org.amqp
 	
 	import org.amqp.impl.ConnectionStateHandler;
 	import org.amqp.impl.SessionImpl;
+	import org.amqp.methods.connection.CloseOk;
 		
 	public class Connection
 	{				
@@ -40,7 +41,7 @@ package org.amqp
 			var stateHandler:ConnectionStateHandler = new ConnectionStateHandler(state);
 
 			session0 = new SessionImpl(this, 0, stateHandler);
-			session0.addAfterCloseEventListener(afterGracefulClose);			
+			session0.addEventListener(new CloseOk(), afterGracefulClose);			
 			stateHandler.registerWithSession(session0);
 			
 			sessionManager = new SessionManager(this);

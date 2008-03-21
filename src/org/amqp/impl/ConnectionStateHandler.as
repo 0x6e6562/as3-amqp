@@ -20,12 +20,12 @@ package org.amqp.impl
 	import com.ericfeminella.utils.HashMap;
 	import com.ericfeminella.utils.Map;
 	
-	import flash.events.EventDispatcher;
 	import flash.utils.ByteArray;
 	
+	import org.amqp.BaseCommandReceiver;
 	import org.amqp.Command;
 	import org.amqp.ConnectionState;
-	import org.amqp.GeneratedCommandReceiver;
+	import org.amqp.ProtocolEvent;
 	import org.amqp.methods.connection.Close;
 	import org.amqp.methods.connection.CloseOk;
 	import org.amqp.methods.connection.Open;
@@ -50,40 +50,22 @@ package org.amqp.impl
 	 * 5. Send connection.Open
 	 * 6. Receive connection.OpenOk
 	 **/
-	public class ConnectionStateHandler extends GeneratedCommandReceiver
+	public class ConnectionStateHandler extends BaseCommandReceiver
 	{
 		private static const STATE_CLOSED:int = 0;
 		private static const STATE_OPEN:int = 1;
 		private static const STATE_CLOSE_REQUESTED:int = 2;
 		
-		private static const CLOSED_EVENT:String = "connection-closed";
-		private static const OPENED_EVENT:String = "connection-opened";
-		
 		private var connectionState:ConnectionState;
 		private var state:int;
-		private var dispatcher:EventDispatcher = new EventDispatcher();
 		
 		public function ConnectionStateHandler(constate:ConnectionState){
 			connectionState = constate;
-		}
-		/*
-		override public function addAfterOpenEventListener(callback:Function):void {
-			dispatcher.addEventListener(OPENED_EVENT,callback);
-		}
-		
-		override public function removeAfterOpenEventListener(callback:Function):void {
-			dispatcher.removeEventListener(OPENED_EVENT,callback);
-		}
-		
-		override public function addAfterCloseEventListener(callback:Function):void {
-			dispatcher.addEventListener(CLOSED_EVENT,callback);
-		}
-		
-		override public function removeAfterCloseEventListener(callback:Function):void {
-			dispatcher.removeEventListener(CLOSED_EVENT,callback);
-		}
-		*/
-		
+			addEventListener(new OpenOk(), onOpenOk);
+			addEventListener(new CloseOk(), onCloseOk);
+			addEventListener(new Start(), onStart);
+			addEventListener(new Tune(), onTune); 
+		}		
 		
 		override public function forceClose():void {
 			trace("forceClose called");
@@ -98,9 +80,9 @@ package org.amqp.impl
 			}			
 		}
 		
-		override public function onConnectionCloseOk(cmd:Command):void {
+		public function onCloseOk(cmd:Command):void {
 			var closeOk:CloseOk = cmd.method as CloseOk;
-			dispatchAfterCloseEvent();
+			//dispatchAfterCloseEvent();
 			state = STATE_CLOSED;
 		}
 		
@@ -108,8 +90,8 @@ package org.amqp.impl
 		// EVENT HANDLING FOR CONNECTION START
 		////////////////////////////////////////////////////////////////
 		
-		override public function onConnectionStart(cmd:Command):void {
-			var start:Start = cmd.method as Start;
+		public function onStart(event:ProtocolEvent):void {
+			var start:Start = event.command.method as Start;
 			// Doesn't do anything fancy with the properties from Start yet
 			var startOk:StartOk = new StartOk();
 			var props:Map = new HashMap();
@@ -133,8 +115,8 @@ package org.amqp.impl
 			send(new Command(startOk));	
 		}
 		
-		override public function onConnectionTune(cmd:Command):void {
-			var tune:Tune = cmd.method as Tune;
+		public function onTune(event:ProtocolEvent):void {
+			var tune:Tune = event.command.method as Tune;
 			var tuneOk:TuneOk = new TuneOk();
 			tuneOk._channelmax = tune._channelmax;
 			tuneOk._framemax = tune._framemax;
@@ -147,8 +129,8 @@ package org.amqp.impl
 			send(new Command(open));	
 		}
 		
-		override public function onConnectionOpenOk(cmd:Command):void {
-			var openOk:OpenOk = cmd.method as OpenOk;
+		public function onOpenOk(event:ProtocolEvent):void {
+			var openOk:OpenOk = event.command.method as OpenOk;
 			// Maybe do something with the knownhosts?
 			//openOk._knownhosts;	
 			if (state == STATE_CLOSE_REQUESTED) {
@@ -156,7 +138,7 @@ package org.amqp.impl
 			}		
 			else {
 				state = STATE_OPEN;
-				dispatchAfterOpenEvent();
+				//dispatchAfterOpenEvent();
 			}						
 		}
 		
@@ -172,14 +154,5 @@ package org.amqp.impl
 		private function send(cmd:Command):void {
 			session.sendCommand(cmd);
 		}
-		/*
-		private function dispatchAfterOpenEvent():void {
-			dispatcher.dispatchEvent(new Event(OPENED_EVENT));
-		}
-		
-		private function dispatchAfterCloseEvent():void {
-			dispatcher.dispatchEvent(new Event(CLOSED_EVENT));
-		}
-		*/
 	}
 }

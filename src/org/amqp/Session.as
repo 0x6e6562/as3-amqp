@@ -27,13 +27,9 @@ package org.amqp
 		
 		function handleFrame(frame:Frame):void;
 		
-		function addAfterOpenEventListener(callback:Function):void;
+		function addEventListener(method:Method, fun:Function):void;
 		
-		function removeAfterOpenEventListener(callback:Function):void;
-		
-		function addAfterCloseEventListener(callback:Function):void;
-		
-		function removeAfterCloseEventListener(callback:Function):void;
+		function removeEventListener(method:Method, fun:Function):void;
 		
 	}
 }
