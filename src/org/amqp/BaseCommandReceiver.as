@@ -42,6 +42,7 @@ package org.amqp
 		}
 		
 		public function receive(cmd:Command):void {			
+			trace("Dispatching event to " + cmd.method.getClassId() + " -  " + cmd.method.getMethodId());
 			dispatcher.dispatchEvent(new ProtocolEvent(cmd));
 		}
 	}

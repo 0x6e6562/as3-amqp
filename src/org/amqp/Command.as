@@ -58,7 +58,7 @@ package org.amqp
 			content = new ByteArray();
 			addToContentBody(b);
 			state = (m == null) ? STATE_EXPECTING_METHOD : STATE_COMPLETE;
-			priority = (m == null) ? -1 : m.getClassId();
+			priority = (m == null) ? -1 : (m.getClassId() * 100 + m.getMethodId() ) * -1;
             remainingBodyBytes = 0;            
 		}
 				
