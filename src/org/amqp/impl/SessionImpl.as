@@ -29,7 +29,7 @@ package org.amqp.impl
 		private var connection:Connection;		
 		private var channel:int;
 		private var commandReceiver:CommandReceiver;
-		private var currentCommand:Command;//new Command();
+		private var currentCommand:Command;
 		
 		public function SessionImpl(con:Connection, ch:int, receiver:CommandReceiver) {
 			connection = con;
