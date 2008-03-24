@@ -14,11 +14,21 @@ public class Method {
 
     private boolean hasResponse = false;
 
+    private boolean hasAltResponse = false;
+
     private boolean synchronous;
 
     private List<Field> fields;
 
     private Method response;
+
+    public boolean isHasAltResponse() {
+        return hasAltResponse;
+    }
+
+    public void setHasAltResponse(boolean hasAltResponse) {
+        this.hasAltResponse = hasAltResponse;
+    }
 
     public boolean isHasResponse() {
         return hasResponse;

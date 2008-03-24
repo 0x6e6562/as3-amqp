@@ -42,8 +42,7 @@ package org.amqp.impl
 	import org.amqp.methods.channel.CloseOk;
 	import org.amqp.methods.channel.OpenOk;
 
-	public class SessionStateHandler extends BaseCommandReceiver 
-	implements RpcClient, ConsumerRegistry
+	public class SessionStateHandler extends BaseCommandReceiver implements RpcClient, ConsumerRegistry
 	{		
 		private static const STATE_CLOSED:int = 0;		
 		private static const STATE_CONNECTION:int = new ConnectionProperties().getClassId();
@@ -78,6 +77,9 @@ package org.amqp.impl
 		public function rpc(cmd:Command, fun:Function):void {
 			var method:Method = cmd.method;
 			addEventListener(method.getResponse(), fun);
+			if (null != method.getAltResponse()) {
+				addEventListener(method.getAltResponse(), fun);
+			}			
 			dispatch(cmd);
 		}
 		
@@ -133,8 +135,7 @@ package org.amqp.impl
 		
 		public function onOpenOk(event:ProtocolEvent):void {
 			transition(STATE_CHANNEL);
-			flushQueue(STATE_ACCESS);			
-			//dispatchAfterOpenEvent();			
+			flushQueue(STATE_ACCESS);					
 		}
 		
 		public function onRequestOk(event:ProtocolEvent):void {
@@ -150,28 +151,23 @@ package org.amqp.impl
 		public function onCloseOk(event:ProtocolEvent):void {
 			ticket = -1;
 			transition(STATE_CONNECTION);
-			//dispatchAfterCloseEvent();
 		}
 		
 		/**
 		 * Enqueues a command in order of ascending class id.
 		 **/
 		private function enqueueCommand(cmd:Command):void {
-			//queue.addObject(cmd, cmd.method.getClassId());
 			commandQueue.enqueue(cmd);
 		}
 		
 		private function flushQueue(limit:int = -1):void {
 			var cmd:Command = commandQueue.dequeue() as Command;
-			
-			//var cmd:Command = queue.removeSmallest() as Command;
 			if (null == cmd) return;
 			var classId:int = cmd.method.getClassId();	
 			
 			if (limit > -1) {
 				if (classId > limit) {
 					commandQueue.enqueue(cmd);
-					//queue.addObject(cmd, classId);
 				}
 				else {
 					sendCommand(cmd);
@@ -186,10 +182,8 @@ package org.amqp.impl
 		
 		private function sendCommand(cmd:Command):void {
 			var method:Method = cmd.method;
-			if (method.getClassId() > STATE_ACCESS) {
+			if (method.hasOwnProperty("_ticket")) {
 				method._ticket = ticket;
-				trace("--------> " + method.getClassId() + " - " +method.getMethodId());
-				trace("--------> " + method._ticket);
 				session.sendCommand(cmd);
 			}
 			else {

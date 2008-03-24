@@ -268,6 +268,11 @@ public class CodeGenerator {
 
             String methodName = ap1.evalXPathToString();
 
+            // Horrible hack
+            if(methodName.equals("get")) {
+                method.setHasAltResponse(true);
+            }
+
             if (methodName.contains("-")) {
                 method.setName(Util.ToUpperCamelCase(methodName));
             }
@@ -306,17 +311,20 @@ public class CodeGenerator {
         AutoPilot ap1 = new AutoPilot();
         AutoPilot ap2 = new AutoPilot();
         AutoPilot ap3 = new AutoPilot();
+        AutoPilot ap4 = new AutoPilot();
 
         ap0.selectXPath(xpath);
         ap1.selectXPath("@name");
         ap2.selectXPath("@synchronous");
         ap3.selectXPath("@index");
+        ap4.selectXPath("@content");
 
 
         ap0.bind(nav);
         ap1.bind(nav);
         ap2.bind(nav);
         ap3.bind(nav);
+        ap4.bind(nav);
 
         ap0.evalXPath();
 
@@ -326,6 +334,7 @@ public class CodeGenerator {
         method.setName(ap1.evalXPathToString());
         method.setSynchronous(ap2.evalXPathToBoolean());
         method.setIndex((int) ap3.evalXPathToNumber());
+        method.setHasContent(ap4.evalXPathToBoolean());
         method.setFields(bindFlatObject(nav, Field.class, "field"));
 
         return method;

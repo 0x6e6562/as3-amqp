@@ -38,14 +38,10 @@ package org.amqp
         public function getResponse():Method {
              return null;
         }
-
-        public function eventId():String {
-		    return getClassId() + "/" + getMethodId();
-		}
-
-		public function event():Event {
-		    return null;//new MethodEvent(eventId());
-		}
+        
+        public function getAltResponse():Method {
+        	return null;
+        }
 
 		public function getClassId():int{
 		    return -1;

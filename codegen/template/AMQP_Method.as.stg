@@ -106,6 +106,12 @@ override public function getResponse():Method {
 }
 <endif>
 
+<if(meth.hasAltResponse)>
+override public function getAltResponse():Method {
+    return new GetEmpty();
+}
+<endif>
+
 override public function getClassId():int{
     return <meth.amqpClass.index>;
 }
