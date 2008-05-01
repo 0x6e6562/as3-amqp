@@ -20,6 +20,13 @@ public class CodeGenerator {
 
     private static Map<String,String> domains;
 
+    /**
+	 * Build a jar/class directory containing all classes from src and the top-level contents
+	 * of specs/ and template/.  Then run CodeGenerator in the top-dir (the one containing codegen)
+	 *
+	 * @param a
+	 * @throws Exception
+	 */
     public static void main(String[] a) throws Exception {
         generateAS3();
 
