@@ -85,13 +85,13 @@ package org.amqp.headers
     
         /** Reads and returns an AMQP short integer content header field, or null if absent. */
         public function readShort():int{
-            if (!argPresent()) return null;
+            if (!argPresent()) return 0;
             return input.readUnsignedShort();
         }
     
         /** Reads and returns an AMQP integer content header field, or null if absent. */
         public function readLong():int{
-            if (!argPresent()) return null;
+            if (!argPresent()) return 0;
             return input.readInt();
         }
     
@@ -114,7 +114,7 @@ package org.amqp.headers
         
         /** Reads and returns an AMQP octet content header field, or null if absent. */
         public function readOctet():int{
-            if (!argPresent()) return null;
+            if (!argPresent()) return 0;
             return input.readUnsignedByte();
         }
     

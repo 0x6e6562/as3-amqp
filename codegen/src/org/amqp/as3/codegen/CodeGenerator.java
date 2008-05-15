@@ -348,8 +348,8 @@ public class CodeGenerator {
 
     }
 
-    private static List bindFlatObject(VTDNav nav, Class c, String elementName) throws Exception {
-        List fields = new ArrayList();
+    private static List<Field> bindFlatObject(VTDNav nav, Class c, String elementName) throws Exception {
+        List<Field> fields = new ArrayList<Field>();
         java.lang.reflect.Field[] fields2 =  c.getDeclaredFields();
         AutoPilot[] pilots = new AutoPilot[fields2.length];
         int i = 0;
@@ -370,7 +370,7 @@ public class CodeGenerator {
                 field.setAccessible(true);
                 setField(nav, pilots, o, j++, field);
             }
-            fields.add(o);
+            fields.add((Field)o);
         }
 
         return fields;

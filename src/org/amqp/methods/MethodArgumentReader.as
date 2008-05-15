@@ -50,7 +50,7 @@ package org.amqp.methods
 	        bit = 0x100;
 	    }	
 	    
-	    protected static function unsignedExtend(value:int) {
+	    protected static function unsignedExtend(value:int):int {
         	return value & INT_MASK;
     	}
 	    

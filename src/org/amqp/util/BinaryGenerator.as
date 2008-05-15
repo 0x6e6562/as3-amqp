@@ -78,7 +78,7 @@ package org.amqp.util
 	    }
 	
 	    /** Public API - encodes a long string argument from a String. */
-	    public final function writeString(str:String) {
+	    public final function writeString(str:String):void {
 	        bitflush();
 	        //byte [] bytes = str.getBytes("utf-8");
 	        writeLong(str.length);
