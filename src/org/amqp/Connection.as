@@ -144,7 +144,6 @@ package org.amqp
 		
 		public function sendFrame(frame:Frame):void {
             if (sock.connected) {
-                trace("Writing frame: " + frame);
                 frame.writeTo(sock);
                 //lastActivityTime = new Date().valueOf();
             } else {

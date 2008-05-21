@@ -41,8 +41,7 @@ package org.amqp
 			dispatcher.removeEventListener(ProtocolEvent.eventType(method), fun);
 		}
 		
-		public function receive(cmd:Command):void {			
-			trace("Dispatching event to " + cmd.method.getClassId() + " -  " + cmd.method.getMethodId());
+		public function receive(cmd:Command):void {
 			dispatcher.dispatchEvent(new ProtocolEvent(cmd));
 		}
 	}

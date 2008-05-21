@@ -87,9 +87,6 @@ package org.amqp
             if (method.getClassId() < 0 || method.getMethodId() < 0) {
                 throw new Error("Method not implemented properly" + method);
             }
-            else {
-                trace("Class id: " + method.getClassId() + " , Method id: " + method.getMethodId());
-            }
             
             bodyOut.writeShort(method.getClassId());
             bodyOut.writeShort(method.getMethodId());
