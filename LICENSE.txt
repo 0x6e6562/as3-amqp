@@ -1,3 +1,5 @@
+This is the license for the non-3rd party code contained in this library:
+
 /**
  * ---------------------------------------------------------------------------
  *   Copyright (C) 2008 0x6e6562
@@ -15,21 +17,9 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp
-{                                    	
-	public class ConnectionState	
-	{
-		public var username:String;
-		public var password:String;
-		public var serverhost:String;
-		public var vhostpath:String;
-		
-		public var useTLS:Boolean = false;
-		public var tlsPort:int = 5673;
-		public var options:* = null;
-		
-		public function get port():int {
-			return useTLS ? tlsPort : AMQP.PORT;	
-		}
-	}
-}
+ 
+ This library also ships with these 3rd party contributions:
+ 
+ * AS3 Crypto, whose licensing terms are contained in the file AS3CRYPTO-LICENSE.txt
+ * AS3DS, which uses the MIT license
+ * Flexunit, which use the BSD license

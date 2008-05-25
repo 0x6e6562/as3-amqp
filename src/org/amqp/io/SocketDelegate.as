@@ -15,21 +15,26 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp
-{                                    	
-	public class ConnectionState	
+package org.amqp.io
+{
+	import flash.net.Socket;
+	
+	import org.amqp.ConnectionState;
+	import org.amqp.IODelegate;
+
+	public class SocketDelegate extends Socket implements IODelegate
 	{
-		public var username:String;
-		public var password:String;
-		public var serverhost:String;
-		public var vhostpath:String;
-		
-		public var useTLS:Boolean = false;
-		public var tlsPort:int = 5673;
-		public var options:* = null;
-		
-		public function get port():int {
-			return useTLS ? tlsPort : AMQP.PORT;	
+		public function SocketDelegate(host:String=null, port:int=0)
+		{
+			super(host, port);
 		}
+		
+		public function isConnected():Boolean {
+			return super.connected;
+		}
+		
+		public function open(state:ConnectionState):void {
+			super.connect(state.serverhost,state.port);
+		}		
 	}
 }

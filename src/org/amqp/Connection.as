@@ -20,17 +20,18 @@ package org.amqp
 	import flash.events.Event;
 	import flash.events.IOErrorEvent;
 	import flash.events.ProgressEvent;
-	import flash.net.Socket;
 	import flash.utils.ByteArray;
 	
 	import org.amqp.impl.ConnectionStateHandler;
 	import org.amqp.impl.SessionImpl;
+	import org.amqp.io.SocketDelegate;
+	import org.amqp.io.TLSDelegate;
 	import org.amqp.methods.connection.CloseOk;
 		
 	public class Connection
 	{				
 		private var shuttingDown:Boolean = false;
-		private var sock:Socket;
+		private var delegate:IODelegate;
 		private var session0:Session;
 		private var connectionState:ConnectionState;
 		public var sessionManager:SessionManager;
@@ -45,11 +46,18 @@ package org.amqp
 			stateHandler.registerWithSession(session0);
 			
 			sessionManager = new SessionManager(this);
-			sock = new Socket();			
-			sock.addEventListener(Event.CONNECT, onSocketConnect);
-			sock.addEventListener(Event.CLOSE, onSocketClose);
-			sock.addEventListener(IOErrorEvent.IO_ERROR, onSocketError);
-			sock.addEventListener(ProgressEvent.SOCKET_DATA, onSocketData);		
+			
+			if (state.useTLS) {
+				delegate = new TLSDelegate;
+			}
+			else {
+				delegate = new SocketDelegate();
+			}
+									
+			delegate.addEventListener(Event.CONNECT, onSocketConnect);
+			delegate.addEventListener(Event.CLOSE, onSocketClose);
+			delegate.addEventListener(IOErrorEvent.IO_ERROR, onSocketError);
+			delegate.addEventListener(ProgressEvent.SOCKET_DATA, onSocketData);		
 		}
 		
 		public function get baseSession():Session {
@@ -57,12 +65,12 @@ package org.amqp
 		}
 		
 		public function start():void {
-			sock.connect(connectionState.serverhost, connectionState.port);
+			delegate.open(connectionState);
 		}				
         
         public function onSocketConnect(event:Event):void {
         	var header:ByteArray = AMQP.generateHeader();
-            sock.writeBytes(header, 0, header.length);
+            delegate.writeBytes(header, 0, header.length);
         }
         
         public function onSocketClose(event:Event):void {        	
@@ -75,7 +83,7 @@ package org.amqp
         
         public function close(reason:Object = null):void {
         	if (!shuttingDown) {        	
-	        	if (sock.connected) {
+	        	if (delegate.isConnected()) {
 	        		handleGracefulShutdown();	        		
 	        	}
 	        	else {
@@ -85,7 +93,7 @@ package org.amqp
         }
         
         public function afterGracefulClose(event:Event):void {
-        	sock.close();
+        	delegate.close();
         }
 				
 		/**
@@ -107,7 +115,7 @@ package org.amqp
 		private function handleGracefulShutdown():void {
 			if (!shuttingDown) {
 				shuttingDown = true;
-				trace("Calling handleGracefulShutdown from connection, so = " + sock.connected);
+				trace("Calling handleGracefulShutdown from connection, so = " + delegate.isConnected());
 				sessionManager.closeGracefully();
 				session0.closeGracefully();
 			}
@@ -118,8 +126,8 @@ package org.amqp
 		 * by a frame handler.
 		 **/ 
 		public function onSocketData(event:Event):void {
-			while (sock.connected && sock.bytesAvailable > 0) {
-				var frame:Frame = parseFrame(sock);
+			while (delegate.isConnected() && delegate.bytesAvailable > 0) {
+				var frame:Frame = parseFrame(delegate);
 				maybeSendHeartbeat();
 				if (frame != null) {
                 	// missedHeartbeats = 0;
@@ -137,14 +145,14 @@ package org.amqp
 			}
 		}
 		
-		private function parseFrame(sock:Socket):Frame {
+		private function parseFrame(delegate:IODelegate):Frame {
         	var frame:Frame = new Frame();
-        	return frame.readFrom(sock) ? frame : null;
+        	return frame.readFrom(delegate) ? frame : null;
         }
 		
 		public function sendFrame(frame:Frame):void {
-            if (sock.connected) {
-                frame.writeTo(sock);
+            if (delegate.isConnected()) {
+                frame.writeTo(delegate);
                 //lastActivityTime = new Date().valueOf();
             } else {
                 throw new Error("Connection main loop not running");
@@ -152,11 +160,11 @@ package org.amqp
         }
         
         public function addSocketEventListener(type:String, listener:Function):void {
-			sock.addEventListener(type, listener);
+			delegate.addEventListener(type, listener);
 		}
 		
 		public function removeSocketEventListener(type:String, listener:Function):void {
-			sock.removeEventListener(type, listener);
+			delegate.removeEventListener(type, listener);
 		}
         
         private function maybeSendHeartbeat():void {}

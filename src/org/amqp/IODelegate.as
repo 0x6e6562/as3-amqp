@@ -16,20 +16,15 @@
  * ---------------------------------------------------------------------------
  **/
 package org.amqp
-{                                    	
-	public class ConnectionState	
+{
+	import flash.events.IEventDispatcher;
+	import flash.utils.IDataInput;
+	import flash.utils.IDataOutput;
+
+	public interface IODelegate extends IEventDispatcher, IDataInput, IDataOutput
 	{
-		public var username:String;
-		public var password:String;
-		public var serverhost:String;
-		public var vhostpath:String;
-		
-		public var useTLS:Boolean = false;
-		public var tlsPort:int = 5673;
-		public var options:* = null;
-		
-		public function get port():int {
-			return useTLS ? tlsPort : AMQP.PORT;	
-		}
+		function open(state:ConnectionState):void;
+		function isConnected():Boolean;
+		function close():void;
 	}
 }

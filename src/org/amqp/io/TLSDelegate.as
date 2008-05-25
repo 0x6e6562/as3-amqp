@@ -15,21 +15,27 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp
-{                                    	
-	public class ConnectionState	
+package org.amqp.io
+{
+	import com.hurlant.crypto.tls.TLSConfig;
+	import com.hurlant.crypto.tls.TLSSocket;
+	
+	import org.amqp.ConnectionState;
+	import org.amqp.IODelegate;
+
+	public class TLSDelegate extends TLSSocket implements IODelegate
 	{
-		public var username:String;
-		public var password:String;
-		public var serverhost:String;
-		public var vhostpath:String;
+		public function TLSDelegate(host:String=null, port:int=0, config:TLSConfig=null)
+		{
+			super(host, port, config);
+		}		
 		
-		public var useTLS:Boolean = false;
-		public var tlsPort:int = 5673;
-		public var options:* = null;
+		public function isConnected():Boolean {
+			return super.connected;
+		}
 		
-		public function get port():int {
-			return useTLS ? tlsPort : AMQP.PORT;	
+		public function open(state:ConnectionState):void {
+			super.connect(state.serverhost,state.port,state.options);
 		}
 	}
 }

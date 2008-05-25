@@ -1,0 +1,12 @@
+--- /Users/0x6e6562/Downloads/Crypto/com/hurlant/crypto/tls/TLSEngine.as	2007-11-19 05:01:32.000000000 +0000
++++ com/hurlant/crypto/tls/TLSEngine.as	2008-05-25 12:02:05.000000000 +0100
+@@ -695,7 +695,8 @@
+ 					}
+ 				}
+ 			} else {
+-				throw new TLSError("Cannot verify certificate", TLSError.bad_certificate);
++				_otherCertificate = firstCert;
++				//throw new TLSError("Cannot verify certificate", TLSError.bad_certificate);
+ 			}
+ 		}
+ 		
