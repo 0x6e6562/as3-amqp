@@ -68,7 +68,11 @@ package org.amqp.headers
      **/
     public class <amqpclass.camelCaseName>Properties extends ContentHeader
     {
-        <amqpclass.fields:public_field(); separator="\n">
+        <amqpclass.fields:no_default_field(); separator="\n">
+
+        <amqpclass.fields:getter(); separator="\n">
+
+        <amqpclass.fields:setter(); separator="\n">
 
         override public function getClassId():int {
             return <amqpclass.index>;
@@ -89,6 +93,10 @@ package org.amqp.headers
 
 body(meth) ::= <<
 <meth.fields:field(); separator="\n">
+
+<meth.fields:getter(); separator="\n">
+
+<meth.fields:setter(); separator="\n">
 
 override public function hasResponse():Boolean {
     return null != getResponse();
@@ -134,9 +142,13 @@ readArgs() ::= "_<it.name> = reader.<readMap.(it.type)>();"
 
 writeArgs() ::= "writer.<writeMap.(it.type)>(_<it.name>);"
 
-field() ::= "public var _<it.name>:<typeMap.(it.type)> = <defaultsMap.(it.type)>;"
+field() ::= "private var _<it.name>:<typeMap.(it.type)> = <defaultsMap.(it.type)>;"
 
-public_field() ::= "public var _<it.name>:<typeMap.(it.type)>;"
+no_default_field() ::= "private var _<it.name>:<typeMap.(it.type)>;"
+
+getter() ::= "public function get <it.name>():<typeMap.(it.type)> {return _<it.name>;}"
+
+setter() ::= "public function set <it.name>(x:<typeMap.(it.type)>):void {_<it.name> = x;}"
 
 typeMap ::= [
         "shortstr":"String",

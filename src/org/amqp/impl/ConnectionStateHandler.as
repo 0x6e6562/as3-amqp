@@ -100,8 +100,8 @@ package org.amqp.impl
 		    props.put("version", LongStringHelper.asLongString("0.1"));
 		    props.put("platform", LongStringHelper.asLongString("AS3"));
 		    
-		    startOk._clientproperties = props;
-		    startOk._mechanism = "AMQPLAIN";
+		    startOk.clientproperties = props;
+		    startOk.mechanism = "AMQPLAIN";
 		    
 		    var credentials:Map = new HashMap();
 		    credentials.put("LOGIN", LongStringHelper.asLongString(connectionState.username));
@@ -109,8 +109,8 @@ package org.amqp.impl
 		    var buf:ByteArray = new ByteArray();
 		    var generator:BinaryGenerator = new BinaryGenerator(buf);
 		    generator.writeTable(credentials, false);
-		    startOk._response = new ByteArrayLongString(buf);
-		    startOk._locale = "en_US";
+		    startOk.response = new ByteArrayLongString(buf);
+		    startOk.locale = "en_US";
 			
 			send(new Command(startOk));	
 		}
@@ -118,21 +118,21 @@ package org.amqp.impl
 		public function onTune(event:ProtocolEvent):void {
 			var tune:Tune = event.command.method as Tune;
 			var tuneOk:TuneOk = new TuneOk();
-			tuneOk._channelmax = tune._channelmax;
-			tuneOk._framemax = tune._framemax;
-			tuneOk._heartbeat = tune._heartbeat;
+			tuneOk.channelmax = tune.channelmax;
+			tuneOk.framemax = tune.framemax;
+			tuneOk.heartbeat = tune.heartbeat;
 			send(new Command(tuneOk));
 			var open:Open = new Open();
-			open._virtualhost = connectionState.vhostpath;
-			open._capabilities = "";
-			open._insist = false;
+			open.virtualhost = connectionState.vhostpath;
+			open.capabilities = "";
+			open.insist = false;
 			send(new Command(open));	
 		}
 		
 		public function onOpenOk(event:ProtocolEvent):void {
 			var openOk:OpenOk = event.command.method as OpenOk;
 			// Maybe do something with the knownhosts?
-			//openOk._knownhosts;	
+			//openOk.knownhosts;	
 			if (state == STATE_CLOSE_REQUESTED) {
 				close();
 			}		
@@ -144,10 +144,10 @@ package org.amqp.impl
 		
 		private function close():void {
 			var close:Close = new Close();
-			close._replycode = 200;
-			close._replytext = "Goodbye";
-			close._classid = 0;
-			close._methodid = 0;
+			close.replycode = 200;
+			close.replytext = "Goodbye";
+			close.classid = 0;
+			close.methodid = 0;
 			send(new Command(close));
 		}
 		

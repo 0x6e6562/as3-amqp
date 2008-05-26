@@ -31,9 +31,9 @@ package org.amqp.util
         
         public static function getBasicProperties():BasicProperties {
         	var props:BasicProperties = new BasicProperties();
-        	props._contenttype = "application/octet-stream";
-        	props._deliverymode = 1;
-        	props._priority = 0;
+        	props.contenttype = "application/octet-stream";
+        	props.deliverymode = 1;
+        	props.priority = 0;
             return props; 
         }
 		

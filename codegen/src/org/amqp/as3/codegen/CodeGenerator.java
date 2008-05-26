@@ -370,10 +370,23 @@ public class CodeGenerator {
                 field.setAccessible(true);
                 setField(nav, pilots, o, j++, field);
             }
-            fields.add((Field)o);
+            fields.add(filterFieldName((Field)o));
         }
 
         return fields;
+    }
+
+
+    /**
+     * This is basically a hack because internal is a key word in AS3. 
+     * @param field
+     * @return
+     */
+    private static Field filterFieldName(Field field) {
+        if (field.getName()[0].equals("internal")) {
+            field.setName(new String[]{"Internal"});
+        }
+        return field;
     }
 
     private static void setField(VTDNav nav, AutoPilot[] pilots, Object o, int j, java.lang.reflect.Field field) throws Exception {

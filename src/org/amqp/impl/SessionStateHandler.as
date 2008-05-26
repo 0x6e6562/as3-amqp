@@ -119,7 +119,7 @@ package org.amqp.impl
 		public function onConsumeOk(event:ProtocolEvent):void {
         	var consumeOk:ConsumeOk = event.command.method as ConsumeOk;
         	var consumer:BasicConsumer = pendingConsumers.dequeue() as BasicConsumer;
-        	var tag:String = consumeOk._consumertag;
+        	var tag:String = consumeOk.consumertag;
         	consumers.insert(tag, consumer);
         	consumer.onConsumeOk(tag);
         }
@@ -129,7 +129,7 @@ package org.amqp.impl
         	var props:BasicProperties = event.command.contentHeader as BasicProperties;
         	var body:ByteArray = event.command.content as ByteArray;
         	body.position = 0;
-        	var consumer:BasicConsumer = consumers.find(deliver._consumertag) as BasicConsumer;
+        	var consumer:BasicConsumer = consumers.find(deliver.consumertag) as BasicConsumer;
         	consumer.onDeliver(deliver, props, body);
         }
 		
@@ -141,7 +141,7 @@ package org.amqp.impl
 		public function onRequestOk(event:ProtocolEvent):void {
 			transition(STATE_ACCESS);
 			var accessRequestOk:RequestOk = event.command.method as RequestOk;
-			ticket = accessRequestOk._ticket;
+			ticket = accessRequestOk.ticket;
 			flushQueue();			
 		}
 		
@@ -183,7 +183,7 @@ package org.amqp.impl
 		private function sendCommand(cmd:Command):void {
 			var method:Method = cmd.method;
 			if (method.hasOwnProperty("_ticket")) {
-				method._ticket = ticket;
+				method.ticket = ticket;
 				session.sendCommand(cmd);
 			}
 			else {
