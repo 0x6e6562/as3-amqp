@@ -15,10 +15,10 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp
+package org.amqp.patterns
 {
 	public interface RpcClient
 	{
-		function rpc(command:Command, callback:Function):void;	
+		function send(o:*, callback:Function):void;	
 	}
 }

@@ -29,7 +29,7 @@ package org.amqp.impl
 	import org.amqp.ConsumerRegistry;
 	import org.amqp.Method;
 	import org.amqp.ProtocolEvent;
-	import org.amqp.RpcClient;
+	import org.amqp.SynchronousCommandClient;
 	import org.amqp.error.IllegalStateError;
 	import org.amqp.headers.AccessProperties;
 	import org.amqp.headers.BasicProperties;
@@ -42,7 +42,7 @@ package org.amqp.impl
 	import org.amqp.methods.channel.CloseOk;
 	import org.amqp.methods.channel.OpenOk;
 
-	public class SessionStateHandler extends BaseCommandReceiver implements RpcClient, ConsumerRegistry
+	public class SessionStateHandler extends BaseCommandReceiver implements SynchronousCommandClient, ConsumerRegistry
 	{		
 		private static const STATE_CLOSED:int = 0;		
 		private static const STATE_CONNECTION:int = new ConnectionProperties().getClassId();
