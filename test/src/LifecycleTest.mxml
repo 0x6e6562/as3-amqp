@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+<mx:Application xmlns:mx="http://www.adobe.com/2006/mxml"
+				xmlns:flexunit="flexunit.flexui.*"
+				creationComplete="onCreationComplete()">
+	
+	<mx:Script>
+		<![CDATA[
+			import org.amqp.test.PublishSubscribeTest;
+			import flexunit.framework.TestSuite;
+			import org.amqp.test.LifecycleTest;
+			
+			private function onCreationComplete()
+			{
+ 				testRunner.test = org.amqp.test.LifecycleTest.suite();
+ 				testRunner.startTest();
+ 			}
+			
+		]]>
+	</mx:Script>
+	<flexunit:TestRunnerBase id="testRunner" width="100%" height="75%" />
+</mx:Application>
