@@ -1,0 +1,8 @@
+.actionScriptProperties
+.flexLibProperties
+.project
+.settings/*
+build/*
+src/org/amqp/AMQP.as
+src/org/amqp/headers/*
+src/org/amqp/methods/*
