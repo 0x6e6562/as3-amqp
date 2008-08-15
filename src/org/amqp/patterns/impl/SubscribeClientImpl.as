@@ -46,6 +46,8 @@ package org.amqp.patterns.impl
         public function SubscribeClientImpl(c:Connection) {
         	// there is a timing constraint here.. the arguments must be set in time
             super(c);
+            
+            realm = "/data";
         }
         
         public function subscribe(key:String, callback:Function):void {

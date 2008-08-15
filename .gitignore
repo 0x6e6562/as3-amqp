@@ -3,6 +3,8 @@
 .project
 .settings/*
 build/*
+bin/*
+src/.settings/*
 src/org/amqp/AMQP.as
 src/org/amqp/headers/*
 src/org/amqp/methods/*

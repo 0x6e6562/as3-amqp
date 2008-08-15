@@ -17,29 +17,62 @@
  **/
 package org.amqp.patterns.impl
 {
-    import flash.utils.ByteArray;
-    
-    import org.amqp.Connection;
-    import org.amqp.ProtocolEvent;
-    import org.amqp.headers.BasicProperties;
-    import org.amqp.patterns.PublishClient;
-    import org.amqp.util.Properties;
+	import de.polygonal.ds.ArrayedQueue;
+	
+	import flash.utils.ByteArray;
+	
+	import org.amqp.Connection;
+	import org.amqp.ProtocolEvent;
+	import org.amqp.headers.BasicProperties;
+	import org.amqp.patterns.PublishClient;
+	import org.amqp.util.Properties;
 
     public class PublishClientImpl extends AbstractDelegate implements PublishClient
     {
+    	private var sendBuffer:ArrayedQueue = new ArrayedQueue(100);
+    	private var requestOk:Boolean;
+    	
         public function PublishClientImpl(c:Connection) {
             super(c);
         }
 
-        public function send(key:String, o:*):void {
+		public function send(key:String, o:*):void {
+			if (o != null) {
+				if (requestOk) {
+					dispatch(key, o);
+				}else {
+					buffer(key, o);
+				}
+			}
+		}
+		
+		private function buffer(key:String, o:*):void {
+			var queuedObj:Object = {key:key, payload:o}; 
+			sendBuffer.enqueue(queuedObj);
+		}
+		
+		private function drainBuffer():void {
+			while(!sendBuffer.isEmpty()) {
+				// why "o" a constant?
+				const o:Object = sendBuffer.dequeue();
+				var key:String = o.key;
+				var data:* = o.payload;
+				dispatch(key, data);
+			}
+		}
+
+        public function dispatch(key:String, o:*):void {
             var data:ByteArray = new ByteArray();
             serializer.serialize(o, data);
             var props:BasicProperties = Properties.getBasicProperties();
             publish(exchange, key, data, props);
         }
 
-        override protected function onRequestOk(event:ProtocolEvent):void {     
+        override protected function onRequestOk(event:ProtocolEvent):void {
             declareExchange(exchange, exchangeType);
+            
+            requestOk = true;
+            drainBuffer();
         }
 	}
 }
