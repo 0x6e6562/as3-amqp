@@ -53,7 +53,7 @@ package org.amqp.patterns.impl
 		
 		private function drainBuffer():void {
 			while(!sendBuffer.isEmpty()) {
-				// why "o" a constant?
+				// why is "o" a constant?
 				const o:Object = sendBuffer.dequeue();
 				var key:String = o.key;
 				var data:* = o.payload;
@@ -68,6 +68,11 @@ package org.amqp.patterns.impl
             publish(exchange, key, data, props);
         }
 
+		// Ben: You mentioned in a comment that Request/RequestOk will disappear from Rabbit
+		// ... if thats the case then how can we handle this event to know when its okay
+		// to begin making requests to the broker?
+		// ... I suppose we can use OpenOk, but then we'll have to change how AbstractDelegate
+		// is written
         override protected function onRequestOk(event:ProtocolEvent):void {
             declareExchange(exchange, exchangeType);
             
