@@ -1,0 +1,77 @@
+AS3-AMQP Library Fork
+==========================================================================
+
+Fork by: Peter Kieltyka
+Original library written by Ben Hood
+Original project repository: http://github.com/0x6e6562/as3-amqp
+
+--------------------------------------------------------------------------
+
+The purpose of this fork has is to add an easy-to-use Pub-Sub client
+pattern into the as3-amqp library.
+
+
+Interfaces:
+-----------
+org.amqp.patterns.BasicMessageEvent
+org.amqp.patterns.PublishClient
+org.amqp.patterns.SubscribeClient
+org.amqp.patterns.PublishSubscribeClient
+
+
+Classes:
+--------
+org.amqp.patterns.impl.PublishClientImpl
+org.amqp.patterns.impl.SubscribeClientImpl
+org.amqp.patterns.impl.PublishSubscribeClientImpl
+
+
+Changes: 
+--------
+
+1. PublishClientImpl 
+- Publishes messages to a topic based on the key provided. It queues 
+messages prior to receiving a requestOk from the server. 
+
+2. SubscribeClientImpl 
+- Subscribes to one or more topics and creates a listener for 
+consuming messages to a callback function. It queues subscription 
+requests until a requestOk is received from the server. 
+
+3. PublishSubscribeClientImpl 
+- This is a combined version of 1&2 above, for two reasons. One, the 
+clients extend the AbstractDelegate class which opens a new connection 
+each time, this will require an intermediary state for the connection 
+like CONNECTING so other clients do not attempt to start a connection 
+while one is connecting. Two, if the client subscribes to a topic, and 
+immediately following a call is made to publish to that topic on some 
+consumption function, the message will be sent out before the 
+subscription is made in most cases, and the message will not be 
+consumed. The solution is to buffer the messages specific to a topic. 
+- Also note that you can use this client without subscribing to any 
+topic 
+- An unsubscribe method is available to purge the bound replyQueue for 
+the topic 
+
+4. PublishSubscribeClientTest 
+- Test suite that demonstrates the functionality of 
+PublishSubscribeClientImpl 
+
+
+TODO / Further exploration: 
+---------------------------
+
+- Ben Hood (creator of this library) mentioned that request/requestOk 
+is being phased out of rabbit, all of the clients wait for a requestOk 
+before making requests to the server. This is how I've left it for the 
+time being until AbstractDelegate is updated by Ben. 
+- Multiple invocations to client constructors (via an intermediary 
+CONNECTING state) 
+- Optimize the file size of overall library to decrease its 304kb 
+weight down to something reasonable. For one, I noticed the core 
+library depends on flexunit.swc, which weighs in at 400kb itself. 
+Perhaps looking at removing that dependency will cut some fat, in 
+particular the ArrayList class is used and should be substituted with 
+something already available. 
+
+
