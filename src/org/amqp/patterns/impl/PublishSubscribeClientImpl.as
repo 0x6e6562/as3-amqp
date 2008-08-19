@@ -102,8 +102,7 @@ package org.amqp.patterns.impl
 			}
 			
 			while(!buffer.isEmpty()) {
-				// why is "o" a constant?
-				const o:Object = buffer.dequeue();
+				var o:Object = buffer.dequeue();
 				var key:String = o.key;
 				var data:* = o.payload;
 				dispatch(key, data);

@@ -53,8 +53,7 @@ package org.amqp.patterns.impl
 		
 		private function drainBuffer():void {
 			while(!sendBuffer.isEmpty()) {
-				// why is "o" a constant?
-				const o:Object = sendBuffer.dequeue();
+				var o:Object = sendBuffer.dequeue();
 				var key:String = o.key;
 				var data:* = o.payload;
 				dispatch(key, data);
