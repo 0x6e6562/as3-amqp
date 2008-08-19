@@ -8,7 +8,7 @@
 			import flexunit.framework.TestSuite;
 			import org.amqp.test.TLSTest;
 			
-			private function onCreationComplete()
+			private function onCreationComplete():void
 			{
  				testRunner.test = org.amqp.test.TLSTest.suite();
  				testRunner.startTest();

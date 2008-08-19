@@ -6,11 +6,11 @@
 	<mx:Script>
 		<![CDATA[
 			import flexunit.framework.TestSuite;
-			import org.amqp.test.PublishSubscribeTest;
+			import org.amqp.test.PublishSubscribeClientTest;
 			
 			private function onCreationComplete():void
 			{
- 				testRunner.test = org.amqp.test.PublishSubscribeTest.suite();
+ 				testRunner.test = org.amqp.test.PublishSubscribeClientTest.suite();
  				testRunner.startTest();
  			}
 			

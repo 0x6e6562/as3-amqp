@@ -26,15 +26,11 @@ package org.amqp.test
 	
 	import org.amqp.BasicConsumer;
 	import org.amqp.Command;
-	import org.amqp.ProtocolEvent;
 	import org.amqp.headers.BasicProperties;
 	import org.amqp.methods.basic.Cancel;
 	import org.amqp.methods.basic.Consume;
 	import org.amqp.methods.basic.Deliver;
-	import org.amqp.methods.basic.Get;
-	import org.amqp.methods.basic.Publish;
 	import org.amqp.methods.connection.OpenOk;
-	import org.amqp.util.Properties;
 	
 	public class PublishSubscribeTest extends AbstractTest implements BasicConsumer
 	{		
@@ -66,11 +62,13 @@ package org.amqp.test
         	data.writeUTF("hello, world");
         	publish(data);
         	
-        	var timer:Timer = new Timer(DELAY, 1);
+        	var timer:Timer;
+        	
+        	timer = new Timer(DELAY, 1);
         	timer.addEventListener(TimerEvent.TIMER_COMPLETE, cancel);
         	timer.start();        	
         	
-        	var timer:Timer = new Timer(DELAY, 1);
+        	timer = new Timer(DELAY, 1);
         	timer.start(); 
         }        
         

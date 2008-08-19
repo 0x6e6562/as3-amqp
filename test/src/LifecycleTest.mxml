@@ -5,11 +5,10 @@
 	
 	<mx:Script>
 		<![CDATA[
-			import org.amqp.test.PublishSubscribeTest;
 			import flexunit.framework.TestSuite;
 			import org.amqp.test.LifecycleTest;
 			
-			private function onCreationComplete()
+			private function onCreationComplete():void
 			{
  				testRunner.test = org.amqp.test.LifecycleTest.suite();
  				testRunner.startTest();
