@@ -66,7 +66,7 @@ package org.amqp.patterns.impl
 		
 		private function drainBuffer():void {
 			while(!sendBuffer.isEmpty()) {
-				const o:Object = sendBuffer.dequeue();
+				var o:Object = sendBuffer.dequeue();
 				var data:* = o.payload;
 				var callback:Function = o.handler;
 				dispatch(data,callback);
