@@ -43,7 +43,6 @@ package org.amqp.test
 		protected static const TIMEOUT:int = 3000;
 		protected static const DELAY:int = 2000;
 		
-		protected var realm:String = "/data";
 		protected var x:String = "x";
 		protected var q:String = "q";
 		protected var x_type:String = "topic";
@@ -91,14 +90,6 @@ package org.amqp.test
         	
         	var open:Open = new Open();
         	
-        	var accessRequest:Request = new Request();
-        	accessRequest.realm = realm;
-        	accessRequest.passive = true;
-        	accessRequest.active = true;
-        	accessRequest.read = true;
-        	accessRequest.write = true;
-        	
-        	
         	var exchange:org.amqp.methods.exchange.Declare = new org.amqp.methods.exchange.Declare();
         	exchange.exchange = x;
         	exchange.type = x_type;        	
@@ -115,8 +106,7 @@ package org.amqp.test
         		trace("onBindOk called");
         	};
         	
-        	sessionHandler.dispatch(new Command(open));        	
-        	sessionHandler.dispatch(new Command(accessRequest));
+        	sessionHandler.dispatch(new Command(open));
         	sessionHandler.dispatch(new Command(exchange));
         	sessionHandler.dispatch(new Command(queue));        	
         	sessionHandler.dispatch(new Command(bind));

@@ -84,7 +84,7 @@ package org.amqp.patterns.impl
 			dispatcher.addEventListener(correlationId,callback);
 		}
 		
-		override protected function onRequestOk(event:ProtocolEvent):void {			
+		override protected function onChannelOpenOk(event:ProtocolEvent):void {			
 			declareExchange(exchange,exchangeType);
 			setupReplyQueue();	
 		}
