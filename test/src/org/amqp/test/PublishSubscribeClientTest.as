@@ -12,7 +12,7 @@ package org.amqp.test
 	public class PublishSubscribeClientTest extends AbstractTest {
 		private var pubClient:PublishClientImpl;
 		private var subClient:SubscribeClientImpl;
-		private var serializer = new JSONSerializer();
+		private var serializer:JSONSerializer = new JSONSerializer();
 		
 		public function PublishSubscribeClientTest(methodName:String=null)
 		{
