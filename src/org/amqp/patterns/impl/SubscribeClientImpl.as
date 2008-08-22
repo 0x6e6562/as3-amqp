@@ -64,6 +64,7 @@ package org.amqp.patterns.impl
         
         public function unsubscribe(key:String):void {
         	topics.remove(key);
+        	dispatcher.removeEventListener(key, CONSUME_HANDLER);
         }
         
         public function dispatch(o:*, callback:Function):void {
