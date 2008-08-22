@@ -17,66 +17,50 @@
  **/
 package org.amqp.patterns.impl
 {
-	import de.polygonal.ds.ArrayedQueue;
-	
 	import flash.utils.ByteArray;
 	
 	import org.amqp.Connection;
 	import org.amqp.ProtocolEvent;
 	import org.amqp.headers.BasicProperties;
+	import org.amqp.patterns.Dispatcher;
 	import org.amqp.patterns.PublishClient;
 	import org.amqp.util.Properties;
 
-    public class PublishClientImpl extends AbstractDelegate implements PublishClient
+    public class PublishClientImpl extends AbstractDelegate implements PublishClient, Dispatcher
     {
-    	private var sendBuffer:ArrayedQueue = new ArrayedQueue(100);
-    	private var requestOk:Boolean;
-    	
+        private var sendBuffer:SendBuffer;
+        private var openOk:Boolean;
+
         public function PublishClientImpl(c:Connection) {
             super(c);
+            sendBuffer = new SendBuffer(this);
         }
 
-		public function send(key:String, o:*):void {
-			if (o != null) {
-				if (requestOk) {
-					dispatch(key, o);
-				}else {
-					buffer(key, o);
-				}
-			}
-		}
-		
-		private function buffer(key:String, o:*):void {
-			var queuedObj:Object = {key:key, payload:o}; 
-			sendBuffer.enqueue(queuedObj);
-		}
-		
-		private function drainBuffer():void {
-			while(!sendBuffer.isEmpty()) {
-				var o:Object = sendBuffer.dequeue();
-				var key:String = o.key;
-				var data:* = o.payload;
-				dispatch(key, data);
-			}
-		}
+        public function send(key:String, o:*):void {
+            if (o != null) {
+            	var data:* = { key:key, content:o };
+            	
+            	if (openOk) {
+            		dispatch(data, null);
+            	}else {
+            		sendBuffer.buffer(data, null);
+            	}
+            }
+        }
 
-        public function dispatch(key:String, o:*):void {
+        public function dispatch(o:*, callback:Function):void {
+            var key:String = o.key;
             var data:ByteArray = new ByteArray();
-            serializer.serialize(o, data);
+            serializer.serialize(o.content, data);
             var props:BasicProperties = Properties.getBasicProperties();
+            props.correlationid = key;
             publish(exchange, key, data, props);
         }
-
-		// Ben: You mentioned in a comment that Request/RequestOk will disappear from Rabbit
-		// ... if thats the case then how can we handle this event to know when its okay
-		// to begin making requests to the broker?
-		// ... I suppose we can use OpenOk, but then we'll have to change how AbstractDelegate
-		// is written
-        override protected function onRequestOk(event:ProtocolEvent):void {
-            declareExchange(exchange, exchangeType);
-            
-            requestOk = true;
-            drainBuffer();
+        
+        override protected function onChannelOpenOk(event:ProtocolEvent):void {
+        	declareExchange(exchange, exchangeType);
+        	sendBuffer.drain();
+        	openOk = true;
         }
-	}
+    }
 }

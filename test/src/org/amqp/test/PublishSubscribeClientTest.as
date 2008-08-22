@@ -1,14 +1,18 @@
 package org.amqp.test
 {
+	import flash.utils.Timer;
+	
 	import flexunit.framework.TestSuite;
 	
 	import org.amqp.Connection;
-	import org.amqp.patterns.BasicMessageEvent;
-	import org.amqp.patterns.impl.PublishSubscribeClientImpl;
+	import org.amqp.patterns.CorrelatedMessageEvent;
+	import org.amqp.patterns.impl.PublishClientImpl;
+	import org.amqp.patterns.impl.SubscribeClientImpl;
 	
 	public class PublishSubscribeClientTest extends AbstractTest {
-		private var client:PublishSubscribeClientImpl;
-		//private var serializer:JSONSerializer;
+		private var pubClient:PublishClientImpl;
+		private var subClient:SubscribeClientImpl;
+		private var serializer = new JSONSerializer();
 		
 		public function PublishSubscribeClientTest(methodName:String=null)
 		{
@@ -17,61 +21,70 @@ package org.amqp.test
 		
 		public static function suite():TestSuite{
             var myTS:TestSuite = new TestSuite();
-            myTS.addTest(new PublishSubscribeClientTest("testPublishSubscribeClient"));
+            myTS.addTest(new PublishSubscribeClientTest("testConnection"));
+            myTS.addTest(new PublishSubscribeClientTest("testSubscribe"));
+            myTS.addTest(new PublishSubscribeClientTest("testPublish"));
             return myTS;
         }
         
-        public function testPublishSubscribeClient():void {
+        public function testConnection():void {
         	connection = new Connection(buildConnectionState());
-        	client = new PublishSubscribeClientImpl(connection);
-        	client.serializer = new JSONSerializer();
-        	client.realm = "/data";
-        	client.exchange = "pubsubTest";
-        	client.exchangeType = "topic";
-        	
-        	trace("Subscribe to topic a.b.c");
-        	client.subscribe("a.b.c", onConsumeABC);
-        	
-        	trace("Subscribe to topic d.e.f");
-        	client.subscribe("d.e.f", onConsumeDEF);
-        	
-        	trace("Publish to topic a.b.c");
-        	client.send("a.b.c", {event:"e-abc-1", msg:1});
-        	client.send("a.b.c", {event:"e-abc-2", msg:2});
-        	
-        	trace("Publish to topic d.e.f");
-        	client.send("d.e.f", {event:"e-def-1", msg:1});
-        	client.send("d.e.f", {event:"e-def-2", msg:2});
         }
         
-       	public function onConsumeABC(event:BasicMessageEvent):void {
+        public function testSubscribe():void {
+        	subClient = new SubscribeClientImpl(connection);
+            subClient.serializer = serializer;
+            subClient.exchange = "pubsubx";
+            subClient.exchangeType = "topic";
+            
+            subClient.subscribe("utest.topic-abc", onConsumeABC);
+            subClient.subscribe("utest.topic-def", onConsumeDEF);
+        }
+        
+        public function testPublish():void {
+        	pubClient = new PublishClientImpl(connection);
+            pubClient.serializer = serializer;
+            pubClient.exchange = "pubsubx";
+            pubClient.exchangeType = "topic";
+            
+            // wait until the topic subscription is completed
+            var timer:Timer = new Timer(DELAY*2, 1);
+            
+            pubClient.send("utest.topic-abc", {msg:"e-abc-1", value:1});
+            pubClient.send("utest.topic-abc", {msg:"e-abc-2", value:2});
+            
+            pubClient.send("utest.topic-def", {msg:"e-def-1", value:1});
+            pubClient.send("utest.topic-def", {msg:"e-def-2", value:2});
+        }
+                
+       	public function onConsumeABC(event:CorrelatedMessageEvent):void {
        		trace("Consumed message from ABC");
        		
        		var o:* = event.result;
        		
-       		switch (o.event) {
+       		switch (o.msg) {
        			case "e-abc-1":
-       				assertEquals(o.msg, 1);
+       				assertEquals(o.value, 1);
        				break;
        			case "e-abc-2":
-       				assertEquals(o.msg, 2);
+       				assertEquals(o.value, 2);
        				break;
        			default:
        				break;
        		}
        	}
        	
-       	public function onConsumeDEF(event:BasicMessageEvent):void {
+       	public function onConsumeDEF(event:CorrelatedMessageEvent):void {
        		trace("Consumed message from DEF");
        		
        		var o:* = event.result;
        		
-       		switch (o.event) {
+       		switch (o.msg) {
        			case "e-def-1":
-       				assertEquals(o.msg, 1);
+       				assertEquals(o.value, 1);
        				break;
        			case "e-def-2":
-       				assertEquals(o.msg, 2);
+       				assertEquals(o.value, 2);
        				break;
        			default:
        				break;

@@ -6,6 +6,9 @@ build/*
 bin/*
 src/.settings/*
 src/bin/*
+src/org/amqp/AMQP.as
+src/org/amqp/headers/*
+src/org/amqp/methods/*
 test/.flexProperties
 test/.settings/
 test/bin-debug/

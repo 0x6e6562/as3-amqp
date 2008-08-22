@@ -17,8 +17,8 @@
  **/
 package org.amqp.patterns
 {
-	public interface PublishClient
-	{
-		function send(key:String, o:*):void;
-	}
+    public interface PublishClient
+    {
+        function send(key:String, o:*):void;
+    }
 }
