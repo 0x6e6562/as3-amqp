@@ -15,14 +15,34 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp.patterns
+package org.amqp.patterns.impl
 {
-	import flash.utils.IDataInput;
-	import flash.utils.IDataOutput;
+	import de.polygonal.ds.ArrayedQueue;
 	
-	public interface Serializer
+	import org.amqp.patterns.Dispatcher;
+	
+	public class SendBuffer
 	{
-		function serialize(o:*,stream:IDataOutput):void;
-		function deserialize(stream:IDataInput):*;		
+		private var sendBuffer:ArrayedQueue = new ArrayedQueue(100);
+		private var dispatcher:Dispatcher;
+		
+		public function SendBuffer(dispatcher:Dispatcher) {
+			this.dispatcher = dispatcher;
+		}
+		
+		public function buffer(o:*, callback:Function):void {
+			var o:Object = {payload:o,handler:callback}; 
+			sendBuffer.enqueue(o);
+		}
+		
+		public function drain():void {
+			while(!sendBuffer.isEmpty()) {
+				var o:Object = sendBuffer.dequeue();
+				var data:* = o.payload;
+				var callback:Function = o.handler;
+				dispatcher.dispatch(data,callback);
+			}
+		}
+
 	}
 }

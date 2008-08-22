@@ -17,13 +17,16 @@
  **/
 package org.amqp.methods
 {
-	import flash.utils.IDataOutput;
-	import flash.utils.ByteArray;
 	import com.ericfeminella.utils.Map;
-	import org.amqp.LongString;
+	
+	import flash.utils.ByteArray;
+	import flash.utils.IDataOutput;
+	
 	import org.amqp.FrameHelper;
-	import org.amqp.util.IOUtils;
+	import org.amqp.LongString;
 	import org.amqp.error.IllegalArgumentError;
+	import org.amqp.util.IOUtils;
+	import org.amqp.util.LongStringHelper;
 	
 	public class MethodArgumentWriter
 	{
@@ -138,7 +141,7 @@ package org.amqp.methods
 	            
 	                if(value is String) {
 	                    writeOctet(83); // 'S'
-	                    writeShortstr(value as String);
+	                    writeString(value as String);
 	                }
 	                else if(value is LongString) {
 	                    writeOctet(83); // 'S'

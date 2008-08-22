@@ -30,6 +30,11 @@ package org.amqp
 		
 	public class Connection
 	{				
+		private static const CLOSED:int = 0;
+		private static const CONNECTING:int = 1;
+		private static const CONNECTED:int = 2;
+		
+		private var currentState:int = CLOSED; 
 		private var shuttingDown:Boolean = false;
 		private var delegate:IODelegate;
 		private var session0:Session;
@@ -65,19 +70,25 @@ package org.amqp
 		}
 		
 		public function start():void {
-			delegate.open(connectionState);
+			if (currentState < CONNECTING) {
+				currentState = CONNECTING;
+				delegate.open(connectionState);
+			}
 		}				
         
         public function onSocketConnect(event:Event):void {
+        	currentState = CONNECTED;
         	var header:ByteArray = AMQP.generateHeader();
             delegate.writeBytes(header, 0, header.length);
         }
         
-        public function onSocketClose(event:Event):void {        	
+        public function onSocketClose(event:Event):void {
+        	currentState = CLOSED;        	
 			handleForcedShutdown();
 		}
 		
 		public function onSocketError(event:IOErrorEvent):void {
+			currentState = CLOSED;
 			trace(event.text);
 		}
         

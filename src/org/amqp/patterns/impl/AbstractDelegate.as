@@ -25,7 +25,6 @@ package org.amqp.patterns.impl
 	import org.amqp.headers.BasicProperties;
 	import org.amqp.impl.SessionStateHandler;
 	import org.amqp.methods.access.Request;
-	import org.amqp.methods.access.RequestOk;
 	import org.amqp.methods.basic.Publish;
 	import org.amqp.methods.channel.Open;
 	import org.amqp.methods.connection.OpenOk;
@@ -54,17 +53,9 @@ package org.amqp.patterns.impl
 		
 		protected function openChannel(event:ProtocolEvent):void {
 			sessionHandler = connection.sessionManager.create();
-        	
         	var open:Open = new Open();
-        	var accessRequest:Request = new Request();
-        	accessRequest.realm = realm;
-        	accessRequest.passive = true;
-        	accessRequest.active = true;
-        	accessRequest.read = true;
-        	accessRequest.write = true;
-        	sessionHandler.dispatch(new Command(open));        	
-        	sessionHandler.dispatch(new Command(accessRequest));
-        	sessionHandler.addEventListener(new RequestOk(), onRequestOk);
+        	sessionHandler.dispatch(new Command(open));
+        	sessionHandler.addEventListener(new org.amqp.methods.channel.OpenOk(), onChannelOpenOk);
 		}
 		
 		protected function publish(x:String, routing_key:String, data:ByteArray, properties:BasicProperties = null):void {
@@ -111,7 +102,7 @@ package org.amqp.patterns.impl
 		/**
 		 * This should be overriden by specializing classes
 		 **/
-		protected function onRequestOk(event:ProtocolEvent):void {}
+		protected function onChannelOpenOk(event:ProtocolEvent):void {}
 		
 		/**
 		 * This should be overriden by specializing classes

@@ -44,7 +44,7 @@ package org.amqp.patterns.impl
 			super(c);
 		}
 		
-		override protected function onRequestOk(event:ProtocolEvent):void {			
+		override protected function onChannelOpenOk(event:ProtocolEvent):void {			
 			declareExchange(exchange,exchangeType);
 			declareQueue("");
 			sessionHandler.addEventListener(new DeclareOk(),onQueueDeclareOk);	

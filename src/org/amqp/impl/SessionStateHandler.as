@@ -31,11 +31,10 @@ package org.amqp.impl
 	import org.amqp.ProtocolEvent;
 	import org.amqp.SynchronousCommandClient;
 	import org.amqp.error.IllegalStateError;
-	import org.amqp.headers.AccessProperties;
 	import org.amqp.headers.BasicProperties;
 	import org.amqp.headers.ChannelProperties;
 	import org.amqp.headers.ConnectionProperties;
-	import org.amqp.methods.access.RequestOk;
+	import org.amqp.headers.ExchangeProperties;
 	import org.amqp.methods.basic.Consume;
 	import org.amqp.methods.basic.ConsumeOk;
 	import org.amqp.methods.basic.Deliver;
@@ -47,10 +46,8 @@ package org.amqp.impl
 		private static const STATE_CLOSED:int = 0;		
 		private static const STATE_CONNECTION:int = new ConnectionProperties().getClassId();
 		private static const STATE_CHANNEL:int = new ChannelProperties().getClassId();
-		private static const STATE_ACCESS:int = new AccessProperties().getClassId();
-		private static const STATE_OPEN:int = new AccessProperties().getClassId() + 1;
-		
-		protected var ticket:int;		
+		private static const STATE_OPEN:int = STATE_CHANNEL + 1;
+				
 		protected var state:int = STATE_CONNECTION;
 		protected var QUEUE_SIZE:int = 100;
 		protected var commandQueue:PriorityQueue = new PriorityQueue(QUEUE_SIZE);
@@ -59,7 +56,6 @@ package org.amqp.impl
 		
 		public function SessionStateHandler(){
 			addEventListener(new OpenOk(), onOpenOk);
-			addEventListener(new RequestOk(), onRequestOk);
 			addEventListener(new CloseOk(), onCloseOk);
 			addEventListener(new Deliver(), onDeliver);
 		}
@@ -88,15 +84,6 @@ package org.amqp.impl
 				case STATE_CLOSED: { stateError(cmd.method.getClassId()); }
 				case STATE_CONNECTION: {
 					if (cmd.method.getClassId() > STATE_CHANNEL) {
-						enqueueCommand(cmd);
-					}
-					else {
-						sendCommand(cmd);
-					}
-					break;
-				}
-				case STATE_CHANNEL: {
-					if (cmd.method.getClassId() > STATE_ACCESS) {
 						enqueueCommand(cmd);
 					}
 					else {
@@ -134,22 +121,14 @@ package org.amqp.impl
         }
 		
 		public function onOpenOk(event:ProtocolEvent):void {
-			transition(STATE_CHANNEL);
-			flushQueue(STATE_ACCESS);					
-		}
-		
-		public function onRequestOk(event:ProtocolEvent):void {
-			transition(STATE_ACCESS);
-			var accessRequestOk:RequestOk = event.command.method as RequestOk;
-			ticket = accessRequestOk.ticket;
-			flushQueue();			
+			transition(STATE_OPEN);
+			flushQueue(-1);					
 		}
 		
 		/**
 		 *  This frees up any resources associated with this session.
 		 **/
 		public function onCloseOk(event:ProtocolEvent):void {
-			ticket = -1;
 			transition(STATE_CONNECTION);
 		}
 		
@@ -181,14 +160,7 @@ package org.amqp.impl
 		}
 		
 		private function sendCommand(cmd:Command):void {
-			var method:Method = cmd.method;
-			if (method.hasOwnProperty("_ticket")) {
-				method.ticket = ticket;
-				session.sendCommand(cmd);
-			}
-			else {
-				session.sendCommand(cmd);
-			}	
+			session.sendCommand(cmd);	
 		}
 		
 		/**
@@ -196,25 +168,7 @@ package org.amqp.impl
 		 **/
 		private function transition(newState:int):void {
 			switch (state) {				
-				case STATE_CLOSED: { stateError(newState); }				
-				case STATE_CONNECTION: {
-					if (newState == STATE_ACCESS) {
-						stateError(newState);
-					}
-					else {
-						state = newState;
-					}
-					break;
-				}
-				case STATE_ACCESS: {
-					if (newState == STATE_CHANNEL) {
-						stateError(newState);
-					}
-					else {
-						state = newState;
-					}
-					break;
-				}
+				case STATE_CLOSED: { stateError(newState); }
 				default: state = newState;
 			}
 		}
