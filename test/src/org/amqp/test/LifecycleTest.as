@@ -51,6 +51,8 @@ package org.amqp.test
         
         public function testLifecycle():void {    
         	connection.start();
+        	// Deliberately call this twice to test the state handling of the connection
+        	connection.start();
         	baseSession.addEventListener(new OpenOk(), addAsync(afterBaseSessionOpened, TIMEOUT) );
         }
         
