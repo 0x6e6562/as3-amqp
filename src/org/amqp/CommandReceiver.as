@@ -17,34 +17,34 @@
  **/
 package org.amqp
 {
-	/**
-	 * A command receiver is a component that is able to process arbritrary
-	 * commands that come from a transport.
-	 **/
-	public interface CommandReceiver
-	{
-		/**
-		 * General callback function to process commands coming from a transport.
-		 **/
-		function receive(cmd:Command):void;
-		
-		/**
-		 * This notifies the receiver that the underlying session should be closed
-		 * in a graceful fashion.
-		 **/
-		function closeGracefully():void;
-		
-		/**
-		 * This notifies the receiver that the underlying session has been closed
-		 * abruptly (e.g. due to a Socket error) and
-		 * therefore no further commands can be received or sent.
-		 **/
-		function forceClose():void;
-		
-		function registerWithSession(s:Session):void;
-		
-		function addEventListener(method:Method, callback:Function):void;
-		
-		function removeEventListener(method:Method, callback:Function):void;
-	}
+    /**
+     * A command receiver is a component that is able to process arbritrary
+     * commands that come from a transport.
+     **/
+    public interface CommandReceiver
+    {
+        /**
+         * General callback function to process commands coming from a transport.
+         **/
+        function receive(cmd:Command):void;
+
+        /**
+         * This notifies the receiver that the underlying session should be closed
+         * in a graceful fashion.
+         **/
+        function closeGracefully():void;
+
+        /**
+         * This notifies the receiver that the underlying session has been closed
+         * abruptly (e.g. due to a Socket error) and
+         * therefore no further commands can be received or sent.
+         **/
+        function forceClose():void;
+
+        function registerWithSession(s:Session):void;
+
+        function addEventListener(method:Method, callback:Function):void;
+
+        function removeEventListener(method:Method, callback:Function):void;
+    }
 }

@@ -17,32 +17,32 @@
  **/
 package org.amqp.patterns.impl
 {
-	import de.polygonal.ds.ArrayedQueue;
-	
-	import org.amqp.patterns.Dispatcher;
-	
-	public class SendBuffer
-	{
-		private var sendBuffer:ArrayedQueue = new ArrayedQueue(100);
-		private var dispatcher:Dispatcher;
-		
-		public function SendBuffer(dispatcher:Dispatcher) {
-			this.dispatcher = dispatcher;
-		}
-		
-		public function buffer(o:*, callback:Function):void {
-			var o:Object = {payload:o,handler:callback}; 
-			sendBuffer.enqueue(o);
-		}
-		
-		public function drain():void {
-			while(!sendBuffer.isEmpty()) {
-				var o:Object = sendBuffer.dequeue();
-				var data:* = o.payload;
-				var callback:Function = o.handler;
-				dispatcher.dispatch(data,callback);
-			}
-		}
+    import de.polygonal.ds.ArrayedQueue;
 
-	}
+    import org.amqp.patterns.Dispatcher;
+
+    public class SendBuffer
+    {
+        private var sendBuffer:ArrayedQueue = new ArrayedQueue(100);
+        private var dispatcher:Dispatcher;
+
+        public function SendBuffer(dispatcher:Dispatcher) {
+            this.dispatcher = dispatcher;
+        }
+
+        public function buffer(o:*, callback:Function):void {
+            var o:Object = {payload:o,handler:callback};
+            sendBuffer.enqueue(o);
+        }
+
+        public function drain():void {
+            while(!sendBuffer.isEmpty()) {
+                var o:Object = sendBuffer.dequeue();
+                var data:* = o.payload;
+                var callback:Function = o.handler;
+                dispatcher.dispatch(data,callback);
+            }
+        }
+
+    }
 }

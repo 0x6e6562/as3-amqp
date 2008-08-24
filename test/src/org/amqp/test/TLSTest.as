@@ -17,32 +17,32 @@
  **/
 package org.amqp.test
 {
-	import com.hurlant.crypto.tls.TLSConfig;
-	import com.hurlant.crypto.tls.TLSEngine;
-	
-	import flexunit.framework.TestSuite;
-	
-	import org.amqp.ConnectionState;
-	
-	public class TLSTest extends org.amqp.test.LifecycleTest
-	{
-		public function TLSTest(methodName:String)
-		{
-			super(methodName);
-		}
-		
-		public static function suite():TestSuite{
+    import com.hurlant.crypto.tls.TLSConfig;
+    import com.hurlant.crypto.tls.TLSEngine;
+
+    import flexunit.framework.TestSuite;
+
+    import org.amqp.ConnectionState;
+
+    public class TLSTest extends org.amqp.test.LifecycleTest
+    {
+        public function TLSTest(methodName:String)
+        {
+            super(methodName);
+        }
+
+        public static function suite():TestSuite{
             var myTS:TestSuite = new TestSuite();
             myTS.addTest(new TLSTest("testLifecycle"));
             return myTS;
         }
-        
+
         override public function buildConnectionState():ConnectionState {
-        	var state:ConnectionState = super.buildConnectionState();
-        	state.useTLS = true;
-        	state.options = new TLSConfig(TLSEngine.CLIENT);
-        	return state;
+            var state:ConnectionState = super.buildConnectionState();
+            state.useTLS = true;
+            state.options = new TLSConfig(TLSEngine.CLIENT);
+            return state;
         }
-		
-	}
+
+    }
 }

@@ -17,8 +17,8 @@
  **/
 package org.amqp.patterns
 {
-	public interface RpcClient
-	{
-		function send(o:*, callback:Function):void;	
-	}
+    public interface RpcClient
+    {
+        function send(o:*, callback:Function):void;
+    }
 }

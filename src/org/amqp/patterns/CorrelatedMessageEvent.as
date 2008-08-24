@@ -17,17 +17,17 @@
  **/
 package org.amqp.patterns
 {
-	import flash.events.Event;
+    import flash.events.Event;
 
-	public class CorrelatedMessageEvent extends Event
-	{
-		public var result:*; 
-		
-		public function CorrelatedMessageEvent(correlationId:String,r:*)
-		{
-			super(correlationId, false, false);
-			result = r;
-		}
-		
-	}
+    public class CorrelatedMessageEvent extends Event
+    {
+        public var result:*;
+
+        public function CorrelatedMessageEvent(correlationId:String,r:*)
+        {
+            super(correlationId, false, false);
+            result = r;
+        }
+
+    }
 }

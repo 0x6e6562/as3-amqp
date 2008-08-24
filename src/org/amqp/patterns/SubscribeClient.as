@@ -19,7 +19,7 @@ package org.amqp.patterns
 {
     public interface SubscribeClient
     {
-        function subscribe(key:String, callback:Function):void; 
+        function subscribe(key:String, callback:Function):void;
         function unsubscribe(key:String):void;
     }
 }

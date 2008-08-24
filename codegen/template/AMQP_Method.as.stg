@@ -22,14 +22,14 @@ package org.amqp.methods.<method.amqpClass.name>
 {
     import org.amqp.Method;
     import org.amqp.LongString;
-	import org.amqp.methods.ArgumentReader;
-	import org.amqp.methods.ArgumentWriter;
-	import org.amqp.methods.MethodArgumentReader;
-	import org.amqp.methods.MethodArgumentWriter;
-	import com.ericfeminella.utils.Map;
-	import com.ericfeminella.utils.HashMap;
-	import org.amqp.impl.ByteArrayLongString;
-	import flash.utils.ByteArray;
+    import org.amqp.methods.ArgumentReader;
+    import org.amqp.methods.ArgumentWriter;
+    import org.amqp.methods.MethodArgumentReader;
+    import org.amqp.methods.MethodArgumentWriter;
+    import com.ericfeminella.utils.Map;
+    import com.ericfeminella.utils.HashMap;
+    import org.amqp.impl.ByteArrayLongString;
+    import flash.utils.ByteArray;
 
     /**
      *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!

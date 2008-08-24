@@ -17,26 +17,26 @@
  **/
 package org.amqp.util
 {
-	import org.amqp.headers.BasicProperties;
-	
-	public class Properties
-	{
-		public function Properties()
-		{
-		}
-		  
+    import org.amqp.headers.BasicProperties;
+
+    public class Properties
+    {
+        public function Properties()
+        {
+        }
+
         public static function getMinimalBasicProperties():BasicProperties {
             return new BasicProperties();
         }
-        
-        public static function getBasicProperties():BasicProperties {
-        	var props:BasicProperties = new BasicProperties();
-        	props.contenttype = "application/octet-stream";
-        	props.deliverymode = 1;
-        	props.priority = 0;
-            return props; 
-        }
-		
 
-	}
+        public static function getBasicProperties():BasicProperties {
+            var props:BasicProperties = new BasicProperties();
+            props.contenttype = "application/octet-stream";
+            props.deliverymode = 1;
+            props.priority = 0;
+            return props;
+        }
+
+
+    }
 }

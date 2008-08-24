@@ -23,7 +23,7 @@
  */
 package com.ericfeminella.utils
 {
-	import flash.utils.Dictionary;
+    import flash.utils.Dictionary;
 
     /**
      * IMap implementation which dynamically creates a HashMap of 

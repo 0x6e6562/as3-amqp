@@ -17,25 +17,25 @@
  **/
 package org.amqp.io
 {
-	import com.hurlant.crypto.tls.TLSConfig;
-	import com.hurlant.crypto.tls.TLSSocket;
-	
-	import org.amqp.ConnectionState;
-	import org.amqp.IODelegate;
+    import com.hurlant.crypto.tls.TLSConfig;
+    import com.hurlant.crypto.tls.TLSSocket;
 
-	public class TLSDelegate extends TLSSocket implements IODelegate
-	{
-		public function TLSDelegate(host:String=null, port:int=0, config:TLSConfig=null)
-		{
-			super(host, port, config);
-		}		
-		
-		public function isConnected():Boolean {
-			return super.connected;
-		}
-		
-		public function open(state:ConnectionState):void {
-			super.connect(state.serverhost,state.port,state.options);
-		}
-	}
+    import org.amqp.ConnectionState;
+    import org.amqp.IODelegate;
+
+    public class TLSDelegate extends TLSSocket implements IODelegate
+    {
+        public function TLSDelegate(host:String=null, port:int=0, config:TLSConfig=null)
+        {
+            super(host, port, config);
+        }
+
+        public function isConnected():Boolean {
+            return super.connected;
+        }
+
+        public function open(state:ConnectionState):void {
+            super.connect(state.serverhost,state.port,state.options);
+        }
+    }
 }

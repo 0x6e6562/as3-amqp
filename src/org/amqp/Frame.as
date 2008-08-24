@@ -17,89 +17,89 @@
  **/
 package org.amqp
 {
-	import flash.utils.ByteArray;
-	import flash.utils.IDataInput;
-	import flash.utils.IDataOutput;
-	import org.amqp.error.MalformedFrameError;
-	
-	public class Frame
-	{
-		
-		public var type:uint;
-		public var channel:int;
-		protected var payload:ByteArray;
-		protected var accumulator:ByteArray;
-				
-		public function Frame() {
-        	this.payload = new ByteArray();
-        	this.accumulator = new ByteArray();        	
-    	}
-    	
-    	public function readFrom(input:IDataInput):Boolean {
-    		
-    		type = input.readUnsignedByte();
-    		
-    		if (type == 'A' as uint) {
-	            /* Probably an AMQP.... header indicating a version mismatch. */
-	            /* Otherwise meaningless, so try to read the version, and
-	             * throw an exception, whether we read the version okay or
-	             * not. */
-	            protocolVersionMismatch(input);
-	        }
+    import flash.utils.ByteArray;
+    import flash.utils.IDataInput;
+    import flash.utils.IDataOutput;
+    import org.amqp.error.MalformedFrameError;
 
-	        channel = input.readUnsignedShort();
-	        var payloadSize:int = input.readInt();
-	        
-	        if (payloadSize > 0) {
-	            payload = new ByteArray();
-	            input.readBytes(payload, 0, payloadSize);
-	        }
-	        
-	        accumulator = null;
-	    
-	        var frameEndMarker:int = input.readUnsignedByte();
-	        
-	        if (frameEndMarker != AMQP.FRAME_END) {	            
-	            throw new MalformedFrameError("Bad frame end marker: " + frameEndMarker);
-	        }
-    		
-    		return true;
-    	}
-    	
-    	private function protocolVersionMismatch(input:IDataInput):void {
-	        
-	        var x:Error = null;
-	        
-	        try {
-	            var gotM:Boolean = input.readUnsignedByte() == 'M' as uint;
-	            var gotQ:Boolean = input.readUnsignedByte() == 'Q' as uint;
-	            var gotP:Boolean = input.readUnsignedByte() == 'P' as uint;
-	            var transportHigh:uint = input.readUnsignedByte();
-	            var transportLow:uint = input.readUnsignedByte();
-	            var serverMajor:uint = input.readUnsignedByte();
-	            var serverMinor:uint = input.readUnsignedByte();
-	            x = new MalformedFrameError("AMQP protocol version mismatch; we are version " +
-	                                            AMQP.PROTOCOL_MAJOR + "." +
-	                                            AMQP.PROTOCOL_MINOR + ", server is " +
-	                                            serverMajor + "." + serverMinor +
-	                                            " with transport " +
-	                                            transportHigh + "." + transportLow);
-	        } catch (e:Error) {
-	        	throw new Error("Invalid AMQP protocol header from server");      
-	        }
-	        
-	        throw x;
-	    }
-	    
-	    public function finishWriting():void {
+    public class Frame
+    {
+
+        public var type:uint;
+        public var channel:int;
+        protected var payload:ByteArray;
+        protected var accumulator:ByteArray;
+
+        public function Frame() {
+            this.payload = new ByteArray();
+            this.accumulator = new ByteArray();
+        }
+
+        public function readFrom(input:IDataInput):Boolean {
+
+            type = input.readUnsignedByte();
+
+            if (type == 'A' as uint) {
+                /* Probably an AMQP.... header indicating a version mismatch. */
+                /* Otherwise meaningless, so try to read the version, and
+                 * throw an exception, whether we read the version okay or
+                 * not. */
+                protocolVersionMismatch(input);
+            }
+
+            channel = input.readUnsignedShort();
+            var payloadSize:int = input.readInt();
+
+            if (payloadSize > 0) {
+                payload = new ByteArray();
+                input.readBytes(payload, 0, payloadSize);
+            }
+
+            accumulator = null;
+
+            var frameEndMarker:int = input.readUnsignedByte();
+
+            if (frameEndMarker != AMQP.FRAME_END) {
+                throw new MalformedFrameError("Bad frame end marker: " + frameEndMarker);
+            }
+
+            return true;
+        }
+
+        private function protocolVersionMismatch(input:IDataInput):void {
+
+            var x:Error = null;
+
+            try {
+                var gotM:Boolean = input.readUnsignedByte() == 'M' as uint;
+                var gotQ:Boolean = input.readUnsignedByte() == 'Q' as uint;
+                var gotP:Boolean = input.readUnsignedByte() == 'P' as uint;
+                var transportHigh:uint = input.readUnsignedByte();
+                var transportLow:uint = input.readUnsignedByte();
+                var serverMajor:uint = input.readUnsignedByte();
+                var serverMinor:uint = input.readUnsignedByte();
+                x = new MalformedFrameError("AMQP protocol version mismatch; we are version " +
+                                                AMQP.PROTOCOL_MAJOR + "." +
+                                                AMQP.PROTOCOL_MINOR + ", server is " +
+                                                serverMajor + "." + serverMinor +
+                                                " with transport " +
+                                                transportHigh + "." + transportLow);
+            } catch (e:Error) {
+                throw new Error("Invalid AMQP protocol header from server");
+            }
+
+            throw x;
+        }
+
+        public function finishWriting():void {
             if (accumulator != null) {
                 payload.writeBytes(accumulator,0,accumulator.bytesAvailable);
                 payload.position = 0;
-                
+
                 accumulator = null;
             }
         }
-    
+
         /**
          * Public API - writes this Frame to the given DataOutputStream
          */
@@ -116,31 +116,31 @@ package org.amqp
             //os.writeBytes(accumulator, 0, accumulator.bytesAvailable);
             os.writeByte(AMQP.FRAME_END);
         }
-        
+
         public function toString():String{
             return "(" + type + ", " + channel + ", length = " +
                 ((accumulator == null) ? payload.length : accumulator.length) + ")";
         }
-    
+
         /**
          * Public API - retrieves the frame payload
          */
         public function getPayload():ByteArray {
             return payload;
         }
-    
+
         /**
          * Public API - retrieves a new DataInputStream streaming over the payload
          */
         public function getInputStream():IDataInput {
             return payload;
         }
-    
+
         /**
          * Public API - retrieves a fresh DataOutputStream streaming into the accumulator
          */
         public function getOutputStream():IDataOutput {
             return accumulator;
         }
-	}
+    }
 }

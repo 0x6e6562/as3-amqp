@@ -17,10 +17,10 @@
  **/
 package org.amqp.methods
 {
-	import org.amqp.methods.MethodArgumentWriter;
-	
-	public interface ArgumentWriter
-	{
-		function writeArgumentsTo(writer:MethodArgumentWriter):void;
-	}
+    import org.amqp.methods.MethodArgumentWriter;
+
+    public interface ArgumentWriter
+    {
+        function writeArgumentsTo(writer:MethodArgumentWriter):void;
+    }
 }

@@ -17,33 +17,33 @@
  **/
 package org.amqp.impl
 {
-	import flash.utils.IDataInput;
-	import flash.utils.ByteArray;
-	import org.amqp.LongString;
+    import flash.utils.IDataInput;
+    import flash.utils.ByteArray;
+    import org.amqp.LongString;
 
-	public class ByteArrayLongString implements LongString
-	{
-		
-		private var buf:ByteArray;
-		
-		public function ByteArrayLongString(b:ByteArray) {
-			this.buf = b;
-		}
-		
-		public function length():int
-		{
-			return buf.length;
-		}
-		
-		public function getBytes():ByteArray
-		{
-			return buf;
-		}
-		
-		public function getStream():IDataInput
-		{
-			return buf;
-		}
-		
-	}
+    public class ByteArrayLongString implements LongString
+    {
+
+        private var buf:ByteArray;
+
+        public function ByteArrayLongString(b:ByteArray) {
+            this.buf = b;
+        }
+
+        public function length():int
+        {
+            return buf.length;
+        }
+
+        public function getBytes():ByteArray
+        {
+            return buf;
+        }
+
+        public function getStream():IDataInput
+        {
+            return buf;
+        }
+
+    }
 }

@@ -19,7 +19,7 @@ package org.amqp
 {
     import com.ericfeminella.utils.Map;
     import org.amqp.error.IllegalArgumentError;
-    
+
     public class FrameHelper
     {
          public static function shortStrSize(str:String):int{
@@ -29,19 +29,19 @@ package org.amqp
 
         /** Computes the AMQP wire-protocol length of a protocol-encoded long string. */
         public static function longStrSize(str:String):int {
-            return str.length + 4; 
+            return str.length + 4;
             //str.getBytes("utf-8").length + 4;
         }
-        
+
         public static function tableSize(table:Map):int{
             var acc:int = 0;
-            
+
             for (var key:String in table) {
-   			    acc += shortStrSize(key);
-   			    acc++;
-   			    var value:Object = table.getValue(key);
-   			     
-   		        if(value is String) {
+                   acc += shortStrSize(key);
+                   acc++;
+                   var value:Object = table.getValue(key);
+
+                   if(value is String) {
                     acc += longStrSize(value as String);
                 }
                 else if(value is LongString) {
@@ -66,7 +66,7 @@ package org.amqp
                 }
                 else {
                     throw new IllegalArgumentError("invalid value in table");
-                }        
+                }
             }
             return acc;
         }

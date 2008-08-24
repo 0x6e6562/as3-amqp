@@ -17,15 +17,15 @@
  **/
 package org.amqp.error
 {
-    
+
     public class IllegalArgumentError extends Error
     {
         private static var ID:int = 668;
-        
+
         public function IllegalArgumentError(message:String)
         {
             super(message, ID);
         }
-        
+
     }
 }

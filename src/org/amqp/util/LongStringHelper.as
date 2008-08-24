@@ -20,7 +20,7 @@ package org.amqp.util
     import flash.utils.ByteArray;
     import org.amqp.LongString;
     import org.amqp.impl.ByteArrayLongString;
-    
+
     public class LongStringHelper
     {
         public static function asLongString(str:String):LongString {

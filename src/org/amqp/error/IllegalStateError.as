@@ -18,15 +18,15 @@
 package org.amqp.error
 {
     import org.amqp.Frame;
-    
+
     public class IllegalStateError extends Error
     {
         private static var ID:int = 667;
-        
+
         public function IllegalStateError(message:String)
         {
             super(message, ID);
         }
-        
+
     }
 }

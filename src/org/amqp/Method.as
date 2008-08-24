@@ -17,19 +17,19 @@
  **/
 package org.amqp
 {
-	import org.amqp.methods.MethodArgumentWriter;
-	import org.amqp.methods.MethodArgumentReader;
-	import flash.events.Event;
-	
+    import org.amqp.methods.MethodArgumentWriter;
+    import org.amqp.methods.MethodArgumentReader;
+    import flash.events.Event;
+
     public dynamic class Method
     {
         public function writeArgumentsTo(writer:MethodArgumentWriter):void {}
 
-		public function readArgumentsFrom(reader:MethodArgumentReader):void {}
+        public function readArgumentsFrom(reader:MethodArgumentReader):void {}
 
-		public function hasContent():Boolean {
-		    return false;
-		}
+        public function hasContent():Boolean {
+            return false;
+        }
 
         public function hasResponse():Boolean {
              return false;
@@ -38,18 +38,18 @@ package org.amqp
         public function getResponse():Method {
              return null;
         }
-        
+
         public function getAltResponse():Method {
-        	return null;
+            return null;
         }
 
-		public function getClassId():int{
-		    return -1;
-		}
+        public function getClassId():int{
+            return -1;
+        }
 
-		public function getMethodId():int{
-		    return -1;
-		}
+        public function getMethodId():int{
+            return -1;
+        }
     }
 }
 

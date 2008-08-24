@@ -17,21 +17,21 @@
  **/
 package org.amqp
 {
-	import flash.events.Event;
+    import flash.events.Event;
 
-	public class ProtocolEvent extends Event
-	{		
-		public var command:Command;
-		
-		public function ProtocolEvent(cmd:Command)
-		{
-			super(eventType(cmd.method));
-			command = cmd;
-		}
-		
-		public static function eventType(method:Method):String {
-			return method.getClassId() + "" + method.getMethodId();
-		}
-		
-	}
+    public class ProtocolEvent extends Event
+    {
+        public var command:Command;
+
+        public function ProtocolEvent(cmd:Command)
+        {
+            super(eventType(cmd.method));
+            command = cmd;
+        }
+
+        public static function eventType(method:Method):String {
+            return method.getClassId() + "" + method.getMethodId();
+        }
+
+    }
 }

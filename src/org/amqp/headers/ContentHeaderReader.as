@@ -17,25 +17,25 @@
  **/
 package org.amqp.headers
 {
-	import flash.utils.IDataInput;
-	
+    import flash.utils.IDataInput;
+    
     public class ContentHeaderReader
     {
         public static function readContentHeaderFrom(input:IDataInput):ContentHeader {
           var classId:int = input.readShort();
           switch (classId) {
-	            case 10: return new ConnectionProperties();
-	            case 20: return new ChannelProperties();
-	            case 30: return new AccessProperties();
-	            case 40: return new ExchangeProperties();
-	            case 50: return new QueueProperties();
-	            case 60: return new BasicProperties();
-	            case 70: return new FileProperties();
-	            case 80: return new StreamProperties();
-	            case 90: return new TxProperties();
-	            case 100: return new DtxProperties();
-	            default: return null;
-	      }
+                case 10: return new ConnectionProperties();
+                case 20: return new ChannelProperties();
+                case 30: return new AccessProperties();
+                case 40: return new ExchangeProperties();
+                case 50: return new QueueProperties();
+                case 60: return new BasicProperties();
+                case 70: return new FileProperties();
+                case 80: return new StreamProperties();
+                case 90: return new TxProperties();
+                case 100: return new DtxProperties();
+                default: return null;
+          }
         }
 
     }

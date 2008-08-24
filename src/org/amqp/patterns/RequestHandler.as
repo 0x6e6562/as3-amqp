@@ -17,8 +17,8 @@
  **/
 package org.amqp.patterns
 {
-	public interface RequestHandler
-	{
-		function process(o:*):*;		
-	}
+    public interface RequestHandler
+    {
+        function process(o:*):*;
+    }
 }

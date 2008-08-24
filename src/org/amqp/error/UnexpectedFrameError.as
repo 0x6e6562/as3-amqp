@@ -29,6 +29,5 @@ package org.amqp.error
             super(message, ID);
             this.frame = frame;
         }
-        
     }
 }

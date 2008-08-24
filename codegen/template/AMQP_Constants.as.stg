@@ -31,14 +31,14 @@ package org.amqp
         <constants:field(); separator="\n">
 
         public static function generateHeader():ByteArray {
-			var buffer:ByteArray = new ByteArray();
-			buffer.writeUTFBytes("AMQP");
-			buffer.writeByte(1);
-			buffer.writeByte(1);
-        	buffer.writeByte(PROTOCOL_MAJOR);
-        	buffer.writeByte(PROTOCOL_MINOR);
-        	return buffer;
-    	}
+            var buffer:ByteArray = new ByteArray();
+            buffer.writeUTFBytes("AMQP");
+            buffer.writeByte(1);
+            buffer.writeByte(1);
+            buffer.writeByte(PROTOCOL_MAJOR);
+            buffer.writeByte(PROTOCOL_MINOR);
+            return buffer;
+        }
     }
 }
 >>

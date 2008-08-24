@@ -17,10 +17,10 @@
  **/
 package org.amqp
 {
-	import org.amqp.methods.basic.Consume;
-	
-	public interface ConsumerRegistry
-	{
-		function register(consume:Consume, consumer:BasicConsumer):void;	
-	}
+    import org.amqp.methods.basic.Consume;
+
+    public interface ConsumerRegistry
+    {
+        function register(consume:Consume, consumer:BasicConsumer):void;
+    }
 }

@@ -17,10 +17,10 @@
  **/
 package org.amqp.methods
 {
-	import org.amqp.methods.MethodArgumentReader;
-	
-	public interface ArgumentReader
-	{
-		function readArgumentsFrom(reader:MethodArgumentReader):void;
-	}
+    import org.amqp.methods.MethodArgumentReader;
+
+    public interface ArgumentReader
+    {
+        function readArgumentsFrom(reader:MethodArgumentReader):void;
+    }
 }

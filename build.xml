@@ -1,96 +1,96 @@
 <?xml version="1.0"?>
 <project name="as3amqp" basedir="." default="lib">
-	<!-- Define build timestamp -->
-	<tstamp>
-		<format property="build.time" pattern="hh:mm aa dd.MM.yyyy"/>
-	</tstamp>
+    <!-- Define build timestamp -->
+    <tstamp>
+        <format property="build.time" pattern="hh:mm aa dd.MM.yyyy"/>
+    </tstamp>
 
-	<!-- Define variables/paths used in this build script -->
-	<property file="build.properties"/>
+    <!-- Define variables/paths used in this build script -->
+    <property file="build.properties"/>
 
-	<!--
-		Have you edit the properties file to make sure the paths are right oo your system?
-	-->
-	<target name="properties">
-		<fail unless="asdoc">The "asdoc" property must be set in build.properties.</fail>
-		<fail unless="compc">The "compc" property must be set in build.properties.</fail>
-	</target>
+    <!--
+        Have you edit the properties file to make sure the paths are right oo your system?
+    -->
+    <target name="properties">
+        <fail unless="asdoc">The "asdoc" property must be set in build.properties.</fail>
+        <fail unless="compc">The "compc" property must be set in build.properties.</fail>
+    </target>
 
-	<!--
-		Compile code generator
-	-->
-	<target name="codeGenerator" depends="properties">
-		<mkdir dir="${build.dir}"/>
-		<copy todir="${build.dir}">
-			<fileset dir="codegen/specs"/>
-			<fileset dir="codegen/template"/>
-		</copy>
-		<javac srcdir="codegen/src" destdir="${build.dir}" failonerror="true">
-			<compilerarg value="-Xlint:all"/> 
-			<classpath>
-				<fileset dir="codegen/lib">
-					<include name="*.jar"/>
-				</fileset>
-			</classpath>
-		</javac>
-		<java classname="org.amqp.as3.codegen.CodeGenerator" failonerror="true">
-			<classpath>
-				<pathelement path="${build.dir}"/>
-				<fileset dir="codegen/lib">
-					<include name="*.jar"/>
-				</fileset>
-			</classpath>
-		</java>
+    <!--
+        Compile code generator
+    -->
+    <target name="codeGenerator" depends="properties">
+        <mkdir dir="${build.dir}"/>
+        <copy todir="${build.dir}">
+            <fileset dir="codegen/specs"/>
+            <fileset dir="codegen/template"/>
+        </copy>
+        <javac srcdir="codegen/src" destdir="${build.dir}" failonerror="true">
+            <compilerarg value="-Xlint:all"/> 
+            <classpath>
+                <fileset dir="codegen/lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </javac>
+        <java classname="org.amqp.as3.codegen.CodeGenerator" failonerror="true">
+            <classpath>
+                <pathelement path="${build.dir}"/>
+                <fileset dir="codegen/lib">
+                    <include name="*.jar"/>
+                </fileset>
+            </classpath>
+        </java>
 
-	</target>
+    </target>
 
-	<!--
-		Compile all of the classes under the "src" tree into a .swc file
-	-->
-	<target name="lib" depends="codeGenerator">
-		<java jar="${compc}" fork="true" failonerror="true">
-			<classpath>
-				<fileset dir="${flexsdk.dir}/lib">
-					<include name="**/*.jar"/>
-				</fileset>
-			</classpath>
-			<jvmarg value="-Dapplication.home=${flexsdk.dir}"/>
+    <!--
+        Compile all of the classes under the "src" tree into a .swc file
+    -->
+    <target name="lib" depends="codeGenerator">
+        <java jar="${compc}" fork="true" failonerror="true">
+            <classpath>
+                <fileset dir="${flexsdk.dir}/lib">
+                    <include name="**/*.jar"/>
+                </fileset>
+            </classpath>
+            <jvmarg value="-Dapplication.home=${flexsdk.dir}"/>
 
-			<arg value="-sp=${src.dir}"/> 
-			<arg value="-is=${src.dir}"/>
-			<arg value="-output=${bin.dir}/${library.name}.swc"/>
-			<arg value="-library-path+=${lib.dir}"/>
-			<arg value="-as3=true"/>
-			<arg value="-optimize=true"/>
-			<arg value="-warnings=true"/>
-			<arg value="-title=${library.name}"/>
-			<arg value="-creator=${library.author}"/>
-			<arg value="-date=${build.time}"/>
-		</java>	
-	</target>
+            <arg value="-sp=${src.dir}"/> 
+            <arg value="-is=${src.dir}"/>
+            <arg value="-output=${bin.dir}/${library.name}.swc"/>
+            <arg value="-library-path+=${lib.dir}"/>
+            <arg value="-as3=true"/>
+            <arg value="-optimize=true"/>
+            <arg value="-warnings=true"/>
+            <arg value="-title=${library.name}"/>
+            <arg value="-creator=${library.author}"/>
+            <arg value="-date=${build.time}"/>
+        </java>    
+    </target>
 
-	<!--
-		Generate ASDoc output for the library
-	-->
-	<target name="doc" depends="properties">
-		<java jar="${asdoc}" fork="true" failonerror="true">	
-			<jvmarg value="-Dapplication.home=${flexsdk.dir}"/>
+    <!--
+        Generate ASDoc output for the library
+    -->
+    <target name="doc" depends="properties">
+        <java jar="${asdoc}" fork="true" failonerror="true">    
+            <jvmarg value="-Dapplication.home=${flexsdk.dir}"/>
 
-			<arg value="-library-path+=${lib.dir}"/>
-			<arg line="-o ${doc.dir}"/>
-			<arg line="-sp ${src.dir}"/>
-			<arg line="-ds ${src.dir} "/>
-			<arg line="-window-title 'Adobe ActionScript 3.0 Library - ${library.name}' "/>
-		</java>
-	</target>
+            <arg value="-library-path+=${lib.dir}"/>
+            <arg line="-o ${doc.dir}"/>
+            <arg line="-sp ${src.dir}"/>
+            <arg line="-ds ${src.dir} "/>
+            <arg line="-window-title 'Adobe ActionScript 3.0 Library - ${library.name}' "/>
+        </java>
+    </target>
 
-	<!--
-		Cleanup
-	-->
-	<target name="clean" description="clean up">
-		<delete dir="${build.dir}"/>
-		<delete dir="${bin.dir}"/>
-		<delete dir="${doc.dir}"/>
-	</target>
+    <!--
+        Cleanup
+    -->
+    <target name="clean" description="clean up">
+        <delete dir="${build.dir}"/>
+        <delete dir="${bin.dir}"/>
+        <delete dir="${doc.dir}"/>
+    </target>
 
 </project>

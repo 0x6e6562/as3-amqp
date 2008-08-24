@@ -17,8 +17,8 @@
  **/
 package org.amqp.patterns
 {
-	public interface Dispatcher
-	{
-		function dispatch(o:*,  callback:Function):void;
-	}
+    public interface Dispatcher
+    {
+        function dispatch(o:*,  callback:Function):void;
+    }
 }

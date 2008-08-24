@@ -17,12 +17,11 @@
  **/
 package org.amqp.error
 {
-	public class MalformedFrameError extends Error
-	{
-		public function MalformedFrameError(message:String="", id:int=0)
-		{
-			super(message, id);
-		}
-		
-	}
+    public class MalformedFrameError extends Error
+    {
+        public function MalformedFrameError(message:String="", id:int=0)
+        {
+            super(message, id); 
+        }
+    }
 }

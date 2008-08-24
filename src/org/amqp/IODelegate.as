@@ -17,14 +17,14 @@
  **/
 package org.amqp
 {
-	import flash.events.IEventDispatcher;
-	import flash.utils.IDataInput;
-	import flash.utils.IDataOutput;
+    import flash.events.IEventDispatcher;
+    import flash.utils.IDataInput;
+    import flash.utils.IDataOutput;
 
-	public interface IODelegate extends IEventDispatcher, IDataInput, IDataOutput
-	{
-		function open(state:ConnectionState):void;
-		function isConnected():Boolean;
-		function close():void;
-	}
+    public interface IODelegate extends IEventDispatcher, IDataInput, IDataOutput
+    {
+        function open(state:ConnectionState):void;
+        function isConnected():Boolean;
+        function close():void;
+    }
 }

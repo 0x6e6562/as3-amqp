@@ -17,12 +17,12 @@
  **/
 package org.amqp.util
 {
-	public class Guid
-	{
-		private static var cnt:int = 0;
-		
-		public static function next():String {
-			return ++cnt + "";
-		}
-	}
+    public class Guid
+    {
+        private static var cnt:int = 0;
+
+        public static function next():String {
+            return ++cnt + "";
+        }
+    }
 }

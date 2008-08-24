@@ -17,15 +17,15 @@
  **/
 package org.amqp
 {
-	import flash.utils.ByteArray;
-	
-	import org.amqp.headers.BasicProperties;
-	import org.amqp.methods.basic.Deliver;
-	
-	public interface BasicConsumer
-	{
-		function onConsumeOk(tag:String):void;
-		function onCancelOk(tag:String):void;
-		function onDeliver(method:Deliver, properties:BasicProperties, body:ByteArray):void;	
-	}
+    import flash.utils.ByteArray;
+
+    import org.amqp.headers.BasicProperties;
+    import org.amqp.methods.basic.Deliver;
+
+    public interface BasicConsumer
+    {
+        function onConsumeOk(tag:String):void;
+        function onCancelOk(tag:String):void;
+        function onDeliver(method:Deliver, properties:BasicProperties, body:ByteArray):void;
+    }
 }

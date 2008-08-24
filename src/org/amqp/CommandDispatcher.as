@@ -17,8 +17,8 @@
  **/
 package org.amqp
 {
-	public interface CommandDispatcher
-	{
-		function dispatch(cmd:Command):void;	
-	}
+    public interface CommandDispatcher
+    {
+        function dispatch(cmd:Command):void;
+    }
 }

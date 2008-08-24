@@ -17,55 +17,55 @@
  **/
 package org.amqp.impl
 {
-	import org.amqp.Command;
-	import org.amqp.CommandReceiver;
-	import org.amqp.Connection;
-	import org.amqp.Frame;
-	import org.amqp.Method;
-	import org.amqp.Session;
+    import org.amqp.Command;
+    import org.amqp.CommandReceiver;
+    import org.amqp.Connection;
+    import org.amqp.Frame;
+    import org.amqp.Method;
+    import org.amqp.Session;
 
-	public class SessionImpl implements Session
-	{
-		private var connection:Connection;		
-		private var channel:int;
-		private var commandReceiver:CommandReceiver;
-		private var currentCommand:Command;
-		
-		public function SessionImpl(con:Connection, ch:int, receiver:CommandReceiver) {
-			connection = con;
-			channel = ch;
-			commandReceiver = receiver;
-		}				
-		
-		public function handleFrame(frame:Frame):void {
-			if (currentCommand == null) {
-				currentCommand = new Command();
-			}
-			currentCommand.handleFrame(frame);
-	        if (currentCommand.isComplete()) {
-	            commandReceiver.receive(currentCommand);
-	            currentCommand = new Command();
-	        }		
-		}
-		
-		public function sendCommand(cmd:Command):void {
-	        cmd.transmit(channel, connection);
+    public class SessionImpl implements Session
+    {
+        private var connection:Connection;
+        private var channel:int;
+        private var commandReceiver:CommandReceiver;
+        private var currentCommand:Command;
+
+        public function SessionImpl(con:Connection, ch:int, receiver:CommandReceiver) {
+            connection = con;
+            channel = ch;
+            commandReceiver = receiver;
         }
-        
+
+        public function handleFrame(frame:Frame):void {
+            if (currentCommand == null) {
+                currentCommand = new Command();
+            }
+            currentCommand.handleFrame(frame);
+            if (currentCommand.isComplete()) {
+                commandReceiver.receive(currentCommand);
+                currentCommand = new Command();
+            }
+        }
+
+        public function sendCommand(cmd:Command):void {
+            cmd.transmit(channel, connection);
+        }
+
         public function closeGracefully():void {
-        	commandReceiver.closeGracefully();
+            commandReceiver.closeGracefully();
         }
-		
-		public function forceClose():void {
-			commandReceiver.forceClose();
-		}
-		
-		public function addEventListener(method:Method, fun:Function):void {
-			commandReceiver.addEventListener(method, fun);	
-		}
-		
-		public function removeEventListener(method:Method, fun:Function):void {
-			commandReceiver.removeEventListener(method, fun);	
-		}
-	}
+
+        public function forceClose():void {
+            commandReceiver.forceClose();
+        }
+
+        public function addEventListener(method:Method, fun:Function):void {
+            commandReceiver.addEventListener(method, fun);
+        }
+
+        public function removeEventListener(method:Method, fun:Function):void {
+            commandReceiver.removeEventListener(method, fun);
+        }
+    }
 }

@@ -17,32 +17,32 @@
  **/
 package org.amqp
 {
-	import flash.events.EventDispatcher;
-	
-	public class BaseCommandReceiver implements CommandReceiver
-	{	
-		private var dispatcher:EventDispatcher = new EventDispatcher();
-    	
+    import flash.events.EventDispatcher;
+
+    public class BaseCommandReceiver implements CommandReceiver
+    {
+        private var dispatcher:EventDispatcher = new EventDispatcher();
+
         protected var session:Session;
 
         public function registerWithSession(s:Session):void {
-			session = s;
-		}
+            session = s;
+        }
 
         public function forceClose():void{}
 
         public function closeGracefully():void{}
-		
-		public function addEventListener(method:Method, fun:Function):void {
-			dispatcher.addEventListener(ProtocolEvent.eventType(method), fun);
-		}
-		
-		public function removeEventListener(method:Method, fun:Function):void {
-			dispatcher.removeEventListener(ProtocolEvent.eventType(method), fun);
-		}
-		
-		public function receive(cmd:Command):void {
-			dispatcher.dispatchEvent(new ProtocolEvent(cmd));
-		}
-	}
+
+        public function addEventListener(method:Method, fun:Function):void {
+            dispatcher.addEventListener(ProtocolEvent.eventType(method), fun);
+        }
+
+        public function removeEventListener(method:Method, fun:Function):void {
+            dispatcher.removeEventListener(ProtocolEvent.eventType(method), fun);
+        }
+
+        public function receive(cmd:Command):void {
+            dispatcher.dispatchEvent(new ProtocolEvent(cmd));
+        }
+    }
 }

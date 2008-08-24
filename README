@@ -20,7 +20,14 @@ library depends on flexunit.swc, which weighs in at 400kb itself.
 Perhaps looking at removing that dependency will cut some fat, in 
 particular the ArrayList class is used and should be substituted with 
 something already available.
+
+- Add the Flexunit Test Suite to the build.xml so that it can be run from
+the command line
+
 - Consider ignoring all messages that are sent from the same application
+
 to a subscribed topic (BasicProperties, userid argument might work)
+
 - Remove binding for a specific routing key when unsubscribing
+
 - Wildcard topics still require some testing

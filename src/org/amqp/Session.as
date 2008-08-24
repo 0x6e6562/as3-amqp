@@ -17,19 +17,19 @@
  **/
 package org.amqp
 {
-	public interface Session
-	{
-		function closeGracefully():void;
-		
-		function forceClose():void;
-		
-		function sendCommand(c:Command):void;
-		
-		function handleFrame(frame:Frame):void;
-		
-		function addEventListener(method:Method, fun:Function):void;
-		
-		function removeEventListener(method:Method, fun:Function):void;
-		
-	}
+    public interface Session
+    {
+        function closeGracefully():void;
+
+        function forceClose():void;
+
+        function sendCommand(c:Command):void;
+
+        function handleFrame(frame:Frame):void;
+
+        function addEventListener(method:Method, fun:Function):void;
+
+        function removeEventListener(method:Method, fun:Function):void;
+
+    }
 }

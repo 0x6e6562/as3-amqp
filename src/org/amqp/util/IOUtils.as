@@ -17,14 +17,14 @@
  **/
 package org.amqp.util
 {
-	import flash.utils.IDataOutput;
-	import flash.utils.ByteArray;
-	
-	public class IOUtils
-	{
-		public static function copy(input:ByteArray, output:IDataOutput):void {
-			
-			output.writeBytes(input);
-		}
-	}
+    import flash.utils.IDataOutput;
+    import flash.utils.ByteArray;
+
+    public class IOUtils
+    {
+        public static function copy(input:ByteArray, output:IDataOutput):void {
+
+            output.writeBytes(input);
+        }
+    }
 }

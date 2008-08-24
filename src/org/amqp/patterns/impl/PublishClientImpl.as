@@ -17,14 +17,14 @@
  **/
 package org.amqp.patterns.impl
 {
-	import flash.utils.ByteArray;
-	
-	import org.amqp.Connection;
-	import org.amqp.ProtocolEvent;
-	import org.amqp.headers.BasicProperties;
-	import org.amqp.patterns.Dispatcher;
-	import org.amqp.patterns.PublishClient;
-	import org.amqp.util.Properties;
+    import flash.utils.ByteArray;
+
+    import org.amqp.Connection;
+    import org.amqp.ProtocolEvent;
+    import org.amqp.headers.BasicProperties;
+    import org.amqp.patterns.Dispatcher;
+    import org.amqp.patterns.PublishClient;
+    import org.amqp.util.Properties;
 
     public class PublishClientImpl extends AbstractDelegate implements PublishClient, Dispatcher
     {
@@ -38,13 +38,13 @@ package org.amqp.patterns.impl
 
         public function send(key:String, o:*):void {
             if (o != null) {
-            	var data:* = { key:key, content:o };
-            	
-            	if (openOk) {
-            		dispatch(data, null);
-            	}else {
-            		sendBuffer.buffer(data, null);
-            	}
+                var data:* = { key:key, content:o };
+
+                if (openOk) {
+                    dispatch(data, null);
+                }else {
+                    sendBuffer.buffer(data, null);
+                }
             }
         }
 
@@ -56,11 +56,11 @@ package org.amqp.patterns.impl
             props.correlationid = key;
             publish(exchange, key, data, props);
         }
-        
+
         override protected function onChannelOpenOk(event:ProtocolEvent):void {
-        	declareExchange(exchange, exchangeType);
-        	sendBuffer.drain();
-        	openOk = true;
+            declareExchange(exchange, exchangeType);
+            sendBuffer.drain();
+            openOk = true;
         }
     }
 }

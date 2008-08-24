@@ -17,62 +17,62 @@
  **/
 package org.amqp
 {
-	import de.polygonal.ds.HashMap;
-	import de.polygonal.ds.Iterator;
-	
-	import org.amqp.impl.SessionImpl;
-	import org.amqp.impl.SessionStateHandler;
-	
-	public class SessionManager
-	{
-		private var connection:Connection;
-		private var sessions:HashMap = new HashMap();
-		private var nextChannel:int = 1;
-		
-		public function SessionManager(con:Connection) {
-			connection = con;	
-		}
-		
-		public function lookup(channel:int):Session {
-			return sessions.find(channel) as Session;
-		}
-		
-		public function create(stateHandler:SessionStateHandler = null):SessionStateHandler {
-			var channel:int = allocateChannelNumber();
-			
-			if (null == stateHandler) {
-				stateHandler = new SessionStateHandler();
-			}
-			
-			var session:Session = new SessionImpl(connection, channel, stateHandler);
-			stateHandler.registerWithSession(session);
-			sessions.insert(channel, session);
-			
-			var s:Session = sessions.find(channel);
-			
-			return stateHandler;		
-		}
-		
-		private function allocateChannelNumber():int {
-			return nextChannel++;	
-		}
-		
-		public function closeGracefully():void {
-        	var it:Iterator = sessions.getIterator();
-			while (it.hasNext()) {
-				var session:Session = it.next() as Session;
-				session.closeGracefully();
-			}
-			sessions.clear();
+    import de.polygonal.ds.HashMap;
+    import de.polygonal.ds.Iterator;
+
+    import org.amqp.impl.SessionImpl;
+    import org.amqp.impl.SessionStateHandler;
+
+    public class SessionManager
+    {
+        private var connection:Connection;
+        private var sessions:HashMap = new HashMap();
+        private var nextChannel:int = 1;
+
+        public function SessionManager(con:Connection) {
+            connection = con;
         }
-		
-		public function forceClose():void {
-			var it:Iterator = sessions.getIterator();
-			while (it.hasNext()) {
-				var session:Session = it.next() as Session;
-				session.forceClose();
-			}
-			sessions.clear();
-		}
-	}
+
+        public function lookup(channel:int):Session {
+            return sessions.find(channel) as Session;
+        }
+
+        public function create(stateHandler:SessionStateHandler = null):SessionStateHandler {
+            var channel:int = allocateChannelNumber();
+
+            if (null == stateHandler) {
+                stateHandler = new SessionStateHandler();
+            }
+
+            var session:Session = new SessionImpl(connection, channel, stateHandler);
+            stateHandler.registerWithSession(session);
+            sessions.insert(channel, session);
+
+            var s:Session = sessions.find(channel);
+
+            return stateHandler;
+        }
+
+        private function allocateChannelNumber():int {
+            return nextChannel++;
+        }
+
+        public function closeGracefully():void {
+            var it:Iterator = sessions.getIterator();
+            while (it.hasNext()) {
+                var session:Session = it.next() as Session;
+                session.closeGracefully();
+            }
+            sessions.clear();
+        }
+
+        public function forceClose():void {
+            var it:Iterator = sessions.getIterator();
+            while (it.hasNext()) {
+                var session:Session = it.next() as Session;
+                session.forceClose();
+            }
+            sessions.clear();
+        }
+    }
 }
