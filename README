@@ -1,42 +1,15 @@
-AS3-AMQP Library Fork
+AS3-AMQP Library
 ==========================================================================
 
-Fork by: Peter Kieltyka
-Original library written by Ben Hood
-Original project repository: http://github.com/0x6e6562/as3-amqp
 
---------------------------------------------------------------------------
+This library provides a high level and a low level AMQP interface for AS3.
 
-The purpose of this fork has is to add an easy-to-use Pub-Sub client
-pattern into the as3-amqp library.
-
-
-Interfaces:
------------
+High Level Interfaces:
+----------------------
 org.amqp.patterns.PublishClient
 org.amqp.patterns.SubscribeClient
-
-
-Classes:
---------
-org.amqp.patterns.impl.PublishClientImpl
-org.amqp.patterns.impl.SubscribeClientImpl
-
-
-Changes: 
---------
-
-1. PublishClientImpl 
-- Publishes messages to a topic based on the key provided.
-
-2. SubscribeClientImpl 
-- Subscribes to one or more topics and creates a listener for 
-consuming messages to a callback function.
-
-3. PublishSubscribeClientTest 
-- Test suite that demonstrates the functionality of 
-PublishClientImpl and SubscribeClientImpl
-
+org.amqp.patterns.RpcClient
+org.amqp.patterns.RpcServer
 
 TODO / Further exploration: 
 ---------------------------
