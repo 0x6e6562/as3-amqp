@@ -21,7 +21,8 @@ package org.amqp
     import flash.events.IOErrorEvent;
     import flash.events.ProgressEvent;
     import flash.utils.ByteArray;
-
+    
+    import org.amqp.error.ConnectionFailedError;
     import org.amqp.impl.ConnectionStateHandler;
     import org.amqp.impl.SessionImpl;
     import org.amqp.io.SocketDelegate;
@@ -90,6 +91,7 @@ package org.amqp
         public function onSocketError(event:IOErrorEvent):void {
             currentState = CLOSED;
             trace(event.text);
+            throw new ConnectionFailedError("Connection failed");
         }
 
         public function close(reason:Object = null):void {

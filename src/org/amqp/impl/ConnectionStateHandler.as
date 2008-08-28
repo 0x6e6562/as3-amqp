@@ -19,13 +19,14 @@ package org.amqp.impl
 {
     import com.ericfeminella.utils.HashMap;
     import com.ericfeminella.utils.Map;
-
+    
     import flash.utils.ByteArray;
-
+    
     import org.amqp.BaseCommandReceiver;
     import org.amqp.Command;
     import org.amqp.ConnectionState;
     import org.amqp.ProtocolEvent;
+    import org.amqp.error.ConnectionLostError;
     import org.amqp.methods.connection.Close;
     import org.amqp.methods.connection.CloseOk;
     import org.amqp.methods.connection.Open;
@@ -69,6 +70,7 @@ package org.amqp.impl
 
         override public function forceClose():void {
             trace("forceClose called");
+            throw new ConnectionLostError("Connection lost");
         }
 
         override public function closeGracefully():void {

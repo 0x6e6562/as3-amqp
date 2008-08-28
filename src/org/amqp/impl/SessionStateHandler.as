@@ -20,9 +20,9 @@ package org.amqp.impl
     import de.polygonal.ds.ArrayedQueue;
     import de.polygonal.ds.HashMap;
     import de.polygonal.ds.PriorityQueue;
-
+    
     import flash.utils.ByteArray;
-
+    
     import org.amqp.BaseCommandReceiver;
     import org.amqp.BasicConsumer;
     import org.amqp.Command;
@@ -34,7 +34,6 @@ package org.amqp.impl
     import org.amqp.headers.BasicProperties;
     import org.amqp.headers.ChannelProperties;
     import org.amqp.headers.ConnectionProperties;
-    import org.amqp.headers.ExchangeProperties;
     import org.amqp.methods.basic.Consume;
     import org.amqp.methods.basic.ConsumeOk;
     import org.amqp.methods.basic.Deliver;
