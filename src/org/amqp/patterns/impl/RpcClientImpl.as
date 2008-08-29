@@ -17,13 +17,18 @@
  **/
 package org.amqp.patterns.impl
 {
-
+    import com.ericfeminella.utils.HashMap;
+    
+    import flash.events.Event;
     import flash.events.EventDispatcher;
+    import flash.events.TimerEvent;
     import flash.utils.ByteArray;
-
+    import flash.utils.Timer;
+    
     import org.amqp.BasicConsumer;
     import org.amqp.Connection;
     import org.amqp.ProtocolEvent;
+    import org.amqp.error.TimeoutError;
     import org.amqp.headers.BasicProperties;
     import org.amqp.methods.basic.Consume;
     import org.amqp.methods.basic.Deliver;
@@ -41,21 +46,23 @@ package org.amqp.patterns.impl
         public var consumerTag:String;
 
         private var dispatcher:EventDispatcher = new EventDispatcher();
-
         private var sendBuffer:SendBuffer;
+        private var calls:HashMap = new HashMap();
 
         public function RpcClientImpl(c:Connection) {
             super(c);
             sendBuffer = new SendBuffer(this);
         }
 
-        public function send(o:*,callback:Function):void {
+        public function send(o:*,callback:Function,timeout:int=-1):void {
             if (null != o) {
+            	var data:* = {data:o, timeout:timeout};
+            	
                 if (null == consumerTag) {
-                    sendBuffer.buffer(o,callback);
+                    sendBuffer.buffer(data,callback);
                 }
                 else {
-                    dispatch(o,callback);
+                    dispatch(data,callback);
                 }
             }
         }
@@ -63,12 +70,44 @@ package org.amqp.patterns.impl
         public function dispatch(o:*,callback:Function):void {
             var correlationId:String = Guid.next();
             var data:ByteArray = new ByteArray();
-            serializer.serialize(o,data);
+            serializer.serialize(o.data,data);
             var props:BasicProperties = Properties.getBasicProperties();
             props.correlationid = correlationId;
             props.replyto = replyQueue;
+            
+            if (o.timeout < 0) {
+            	dispatcher.addEventListener(correlationId,callback);
+            }else {
+            	dispatcher.addEventListener(correlationId,timeoutHandler);
+            	
+            	var timer:Timer = new Timer(o.timeout,1);
+            	timer.addEventListener(TimerEvent.TIMER_COMPLETE,timeoutHandler);
+            	timer.start();
+            	
+            	calls.put(correlationId, {callback:callback, timer:timer});
+            }
+            
             publish(exchange,routingKey,data,props);
-            dispatcher.addEventListener(correlationId,callback);
+        }
+        
+        public function timeoutHandler(event:Event):void {
+            switch (event.type) {
+                case TimerEvent.TIMER_COMPLETE:
+                    dispatcher.dispatchEvent(new TimeoutError());
+                    break;
+                    
+        		default:
+                    var response:* = calls.getValue(event.type);
+                    response.timer.stop();
+                    response.callback.call(null, event);
+                    calls.remove(event.type);
+                    
+                    break;
+        	}
+        }
+
+        public function addTimeoutHandler(callback:Function):void {
+        	dispatcher.addEventListener(TimeoutError.TIMEOUT_ERROR, callback);
         }
 
         override protected function onChannelOpenOk(event:ProtocolEvent):void {

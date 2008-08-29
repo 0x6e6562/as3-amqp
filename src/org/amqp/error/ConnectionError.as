@@ -24,8 +24,7 @@ package org.amqp.error
     	public static const CONNECTION_ERROR:String = "connectionError";
         public const message:String = "Connection failed";
         
-        public function ConnectionError()
-        {
+        public function ConnectionError() {
             super(CONNECTION_ERROR, false, false, message);
         }
     }

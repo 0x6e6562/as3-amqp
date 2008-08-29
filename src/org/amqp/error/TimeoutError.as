@@ -15,10 +15,17 @@
  *   limitations under the License.
  * ---------------------------------------------------------------------------
  **/
-package org.amqp.patterns
+package org.amqp.error
 {
-    public interface RpcClient
+    import flash.events.ErrorEvent;
+
+    public class TimeoutError extends ErrorEvent
     {
-        function send(o:*, callback:Function, timeout:int=-1):void;
+        public static const TIMEOUT_ERROR:String = "timeoutError";
+        public const message:String = "Request timed out";
+        
+        public function TimeoutError() {
+            super(TIMEOUT_ERROR, true, false, message);
+        }
     }
 }
