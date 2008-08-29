@@ -26,7 +26,6 @@ package org.amqp.impl
     import org.amqp.Command;
     import org.amqp.ConnectionState;
     import org.amqp.ProtocolEvent;
-    import org.amqp.error.ConnectionLostError;
     import org.amqp.methods.connection.Close;
     import org.amqp.methods.connection.CloseOk;
     import org.amqp.methods.connection.Open;
@@ -70,7 +69,6 @@ package org.amqp.impl
 
         override public function forceClose():void {
             trace("forceClose called");
-            throw new ConnectionLostError("Connection lost");
         }
 
         override public function closeGracefully():void {
