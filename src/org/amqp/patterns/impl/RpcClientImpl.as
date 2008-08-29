@@ -91,18 +91,13 @@ package org.amqp.patterns.impl
         }
         
         public function timeoutHandler(event:Event):void {
-            switch (event.type) {
-                case TimerEvent.TIMER_COMPLETE:
-                    dispatcher.dispatchEvent(new TimeoutError());
-                    break;
-                    
-        		default:
-                    var response:* = calls.getValue(event.type);
-                    response.timer.stop();
-                    response.callback.call(null, event);
-                    calls.remove(event.type);
-                    
-                    break;
+            if (event.type == TimerEvent.TIMER_COMPLETE) {
+                dispatcher.dispatchEvent(new TimeoutError());
+            }else {
+                var response:* = calls.getValue(event.type);
+                response.timer.stop();
+                response.callback.call(null, event);
+                calls.remove(event.type);
         	}
         }
 
