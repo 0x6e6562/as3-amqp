@@ -48,7 +48,8 @@ package org.amqp.test
             pubClient.exchangeType = "topic";
 
             // wait until the topic subscription is completed
-            var timer:Timer = new Timer(DELAY*2, 1);
+            var timer:Timer = new Timer(DELAY, 1);
+            timer.start();
 
             pubClient.send("utest.topic-abc", {msg:"e-abc-1", value:1});
             pubClient.send("utest.topic-abc", {msg:"e-abc-2", value:2});
