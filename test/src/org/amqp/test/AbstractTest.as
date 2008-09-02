@@ -30,7 +30,6 @@ package org.amqp.test
     import org.amqp.SessionManager;
     import org.amqp.headers.BasicProperties;
     import org.amqp.impl.SessionStateHandler;
-    import org.amqp.methods.access.Request;
     import org.amqp.methods.basic.Publish;
     import org.amqp.methods.channel.Open;
     import org.amqp.methods.exchange.Declare;

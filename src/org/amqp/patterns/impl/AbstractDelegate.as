@@ -24,7 +24,6 @@ package org.amqp.patterns.impl
     import org.amqp.ProtocolEvent;
     import org.amqp.headers.BasicProperties;
     import org.amqp.impl.SessionStateHandler;
-    import org.amqp.methods.access.Request;
     import org.amqp.methods.basic.Publish;
     import org.amqp.methods.channel.Open;
     import org.amqp.methods.connection.OpenOk;

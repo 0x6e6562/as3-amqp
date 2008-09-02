@@ -25,7 +25,6 @@ package org.amqp.test
 
     import org.amqp.Command;
     import org.amqp.ProtocolEvent;
-    import org.amqp.methods.access.Request;
     import org.amqp.methods.channel.Close;
     import org.amqp.methods.channel.Open;
     import org.amqp.methods.connection.OpenOk;
