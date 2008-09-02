@@ -63,10 +63,10 @@ package org.amqp.patterns.impl
         }
 
         public function unsubscribe(key:String):void {
-        	var cancel:Cancel = new Cancel();
-        	var topic:* = topics.getValue(key);
+            var cancel:Cancel = new Cancel();
+            var topic:* = topics.getValue(key);
         	
-        	cancel.consumertag = topic.consumerTag;
+            cancel.consumertag = topic.consumerTag;
             sessionHandler.dispatch(new Command(cancel));
             sessionHandler.addEventListener(new org.amqp.methods.basic.CancelOk, onCancelOk);
         	
@@ -75,7 +75,7 @@ package org.amqp.patterns.impl
         }
 
         public function dispatch(o:*, callback:Function):void {
-        	var consume:Consume = new Consume();
+            var consume:Consume = new Consume();
             consume.queue = replyQueue;
             consume.noack = true;
             consume.consumertag = replyQueue + ":" + o;
