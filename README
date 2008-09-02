@@ -20,6 +20,11 @@ library depends on flexunit.swc, which weighs in at 400kb itself.
 Perhaps looking at removing that dependency will cut some fat, in 
 particular the ArrayList class is used and should be substituted with 
 something already available.
+|--> Update: the dependency is now removed - the build script just needs modification
+
+- Remove the dependency on ericfeminella's HashMap
+
+- Make the TLS bundling optional
 
 - Add the Flexunit Test Suite to the build.xml so that it can be run from
 the command line
