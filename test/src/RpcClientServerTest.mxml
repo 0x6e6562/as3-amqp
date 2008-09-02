@@ -6,7 +6,7 @@
     <mx:Script>
         <![CDATA[
             import flexunit.framework.TestSuite;
-        	import org.amqp.test.RpcClientServerTest;
+            import org.amqp.test.RpcClientServerTest;
 
             private function onCreationComplete():void
             {

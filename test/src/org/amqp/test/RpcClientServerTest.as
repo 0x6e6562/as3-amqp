@@ -1,18 +1,18 @@
 package org.amqp.test
 {
-	import flash.utils.Timer;
+    import flash.utils.Timer;
 
-	import flexunit.framework.TestSuite;
+    import flexunit.framework.TestSuite;
 
-	import org.amqp.Connection;
-	import org.amqp.error.TimeoutError;
-	import org.amqp.patterns.CorrelatedMessageEvent;
-	import org.amqp.patterns.impl.RpcClientImpl;
-	import org.amqp.patterns.impl.RpcServer;
+    import org.amqp.Connection;
+    import org.amqp.error.TimeoutError;
+    import org.amqp.patterns.CorrelatedMessageEvent;
+    import org.amqp.patterns.impl.RpcClientImpl;
+    import org.amqp.patterns.impl.RpcServer;
 
     public class RpcClientServerTest extends AbstractTest {
-    	private const FIB_QUESTION:int = 5;
-    	private const FIB_ANSWER:int = 8;
+        private const FIB_QUESTION:int = 5;
+        private const FIB_ANSWER:int = 8;
 
         private var rpc:RpcClientImpl;
         private var serv:RpcServer;
@@ -34,7 +34,7 @@ package org.amqp.test
         }
 
         public function testRpc():void {
-        	serv = new RpcServer(connection);
+            serv = new RpcServer(connection);
             serv.serializer = new JSONSerializer();
             serv.exchange = "rpcx";
             serv.exchangeType = "direct";
@@ -42,7 +42,7 @@ package org.amqp.test
             serv.requestHandler = new Fibonacci();
             serv.debug = false;
 
-        	rpc = new RpcClientImpl(connection);
+            rpc = new RpcClientImpl(connection);
             rpc.serializer = new JSONSerializer();
             rpc.exchange = "rpcx";
             rpc.exchangeType = "direct";
@@ -53,15 +53,15 @@ package org.amqp.test
             rpc.addTimeoutHandler(timeoutHandler);
 
             // Send RPC request without a timeout
-        	var o:* = {number:FIB_QUESTION};
-        	rpc.send(o, rpcCallback);
+            var o:* = {number:FIB_QUESTION};
+            rpc.send(o, rpcCallback);
 
-        	// Change the exchange for the RPC client so it doesn't invoke
-        	// the server and times-out
-        	rpc.exchange = "nobody";
-        	rpc.send(o, rpcCallback, TIMEOUT);
-        	var timer:Timer = new Timer(TIMEOUT, 1);
-        	timer.start();
+            // Change the exchange for the RPC client so it doesn't invoke
+            // the server and times-out
+            rpc.exchange = "nobody";
+            rpc.send(o, rpcCallback, TIMEOUT);
+            var timer:Timer = new Timer(TIMEOUT, 1);
+            timer.start();
         }
 
         public function rpcCallback(event:CorrelatedMessageEvent):void {
@@ -70,8 +70,8 @@ package org.amqp.test
         }
 
         public function timeoutHandler(event:TimeoutError):void {
-        	assertEquals(event.type, TimeoutError.TIMEOUT_ERROR);
-        	trace("rpc timed out");
+            assertEquals(event.type, TimeoutError.TIMEOUT_ERROR);
+            trace("rpc timed out");
         }
     }
 }
