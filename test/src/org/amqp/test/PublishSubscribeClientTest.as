@@ -57,38 +57,38 @@ package org.amqp.test
             pubClient.send("utest.topic-def", {msg:"e-def-2", value:2});
         }
 
-           public function onConsumeABC(event:CorrelatedMessageEvent):void {
-               trace("Consumed message from ABC");
+       public function onConsumeABC(event:CorrelatedMessageEvent):void {
+           trace("Consumed message from ABC");
 
-               var o:* = event.result;
+           var o:* = event.result;
 
-               switch (o.msg) {
-                   case "e-abc-1":
-                       assertEquals(o.value, 1);
-                       break;
-                   case "e-abc-2":
-                       assertEquals(o.value, 2);
-                       break;
-                   default:
-                       break;
-               }
+           switch (o.msg) {
+               case "e-abc-1":
+                   assertEquals(o.value, 1);
+                   break;
+               case "e-abc-2":
+                   assertEquals(o.value, 2);
+                   break;
+               default:
+                   break;
            }
+       }
 
-           public function onConsumeDEF(event:CorrelatedMessageEvent):void {
-               trace("Consumed message from DEF");
+       public function onConsumeDEF(event:CorrelatedMessageEvent):void {
+           trace("Consumed message from DEF");
 
-               var o:* = event.result;
+           var o:* = event.result;
 
-               switch (o.msg) {
-                   case "e-def-1":
-                       assertEquals(o.value, 1);
-                       break;
-                   case "e-def-2":
-                       assertEquals(o.value, 2);
-                       break;
-                   default:
-                       break;
-               }
+           switch (o.msg) {
+               case "e-def-1":
+                   assertEquals(o.value, 1);
+                   break;
+               case "e-def-2":
+                   assertEquals(o.value, 2);
+                   break;
+               default:
+                   break;
            }
+       }
     }
 }
