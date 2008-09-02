@@ -20,7 +20,7 @@ package org.amqp.io
     import com.hurlant.crypto.tls.TLSConfig;
     import com.hurlant.crypto.tls.TLSSocket;
 
-    import org.amqp.ConnectionState;
+    import org.amqp.ConnectionParameters;
     import org.amqp.IODelegate;
 
     public class TLSDelegate extends TLSSocket implements IODelegate
@@ -34,8 +34,8 @@ package org.amqp.io
             return super.connected;
         }
 
-        public function open(state:ConnectionState):void {
-            super.connect(state.serverhost,state.port,state.options);
+        public function open(params:ConnectionParameters):void {
+            super.connect(params.serverhost, params.port, params.options);
         }
     }
 }

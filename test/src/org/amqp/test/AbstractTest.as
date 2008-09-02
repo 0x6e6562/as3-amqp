@@ -24,7 +24,7 @@ package org.amqp.test
 
     import org.amqp.Command;
     import org.amqp.Connection;
-    import org.amqp.ConnectionState;
+    import org.amqp.ConnectionParameters;
     import org.amqp.ProtocolEvent;
     import org.amqp.Session;
     import org.amqp.SessionManager;
@@ -57,20 +57,19 @@ package org.amqp.test
             super(methodName);
         }
 
-        public function buildConnectionState():ConnectionState {
-            var state:ConnectionState = new ConnectionState();
-            state.username = "guest";
-            state.password = "guest";
-            state.vhostpath = "/";
-            state.serverhost = "localhost";
-            return state;
+        public function buildConnectionParams():ConnectionParameters {
+            var params:ConnectionParameters = new ConnectionParameters();
+            params.username = "guest";
+            params.password = "guest";
+            params.vhostpath = "/";
+            params.serverhost = "localhost";
+            return params;
         }
 
         override public function setUp():void {
-            var state:ConnectionState = buildConnectionState();
-              connection = new Connection(state);
-              baseSession = connection.baseSession;
-              sessionManager = connection.sessionManager;
+            connection = new Connection(buildConnectionParams());
+            baseSession = connection.baseSession;
+            sessionManager = connection.sessionManager;
         }
 
         protected function publish(data:ByteArray):void {

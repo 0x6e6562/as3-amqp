@@ -23,7 +23,7 @@ package org.amqp
 
     public interface IODelegate extends IEventDispatcher, IDataInput, IDataOutput
     {
-        function open(state:ConnectionState):void;
+        function open(params:ConnectionParameters):void;
         function isConnected():Boolean;
         function close():void;
     }

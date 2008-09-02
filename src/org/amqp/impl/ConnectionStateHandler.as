@@ -19,12 +19,12 @@ package org.amqp.impl
 {
     import com.ericfeminella.utils.HashMap;
     import com.ericfeminella.utils.Map;
-    
+
     import flash.utils.ByteArray;
-    
+
     import org.amqp.BaseCommandReceiver;
     import org.amqp.Command;
-    import org.amqp.ConnectionState;
+    import org.amqp.ConnectionParameters;
     import org.amqp.ProtocolEvent;
     import org.amqp.methods.connection.Close;
     import org.amqp.methods.connection.CloseOk;
@@ -56,11 +56,11 @@ package org.amqp.impl
         private static const STATE_OPEN:int = 1;
         private static const STATE_CLOSE_REQUESTED:int = 2;
 
-        private var connectionState:ConnectionState;
+        private var connectionParams:ConnectionParameters;
         private var state:int;
 
-        public function ConnectionStateHandler(constate:ConnectionState){
-            connectionState = constate;
+        public function ConnectionStateHandler(params:ConnectionParameters){
+            connectionParams = params;
             addEventListener(new OpenOk(), onOpenOk);
             addEventListener(new CloseOk(), onCloseOk);
             addEventListener(new Start(), onStart);
@@ -104,8 +104,8 @@ package org.amqp.impl
             startOk.mechanism = "AMQPLAIN";
 
             var credentials:Map = new HashMap();
-            credentials.put("LOGIN", LongStringHelper.asLongString(connectionState.username));
-            credentials.put("PASSWORD", LongStringHelper.asLongString(connectionState.password));
+            credentials.put("LOGIN", LongStringHelper.asLongString(connectionParams.username));
+            credentials.put("PASSWORD", LongStringHelper.asLongString(connectionParams.password));
             var buf:ByteArray = new ByteArray();
             var generator:BinaryGenerator = new BinaryGenerator(buf);
             generator.writeTable(credentials, false);
@@ -123,7 +123,7 @@ package org.amqp.impl
             tuneOk.heartbeat = tune.heartbeat;
             send(new Command(tuneOk));
             var open:Open = new Open();
-            open.virtualhost = connectionState.vhostpath;
+            open.virtualhost = connectionParams.vhostpath;
             open.capabilities = "";
             open.insist = false;
             send(new Command(open));

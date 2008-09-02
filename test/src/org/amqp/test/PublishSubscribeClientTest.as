@@ -28,7 +28,7 @@ package org.amqp.test
         }
 
         public function testConnection():void {
-            connection = new Connection(buildConnectionState());
+            connection = new Connection(buildConnectionParams());
         }
 
         public function testSubscribe():void {

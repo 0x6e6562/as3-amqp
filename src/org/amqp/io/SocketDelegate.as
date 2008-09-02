@@ -19,7 +19,7 @@ package org.amqp.io
 {
     import flash.net.Socket;
 
-    import org.amqp.ConnectionState;
+    import org.amqp.ConnectionParameters;
     import org.amqp.IODelegate;
 
     public class SocketDelegate extends Socket implements IODelegate
@@ -33,8 +33,8 @@ package org.amqp.io
             return super.connected;
         }
 
-        public function open(state:ConnectionState):void {
-            super.connect(state.serverhost,state.port);
+        public function open(params:ConnectionParameters):void {
+            super.connect(params.serverhost, params.port);
         }
     }
 }

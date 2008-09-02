@@ -21,7 +21,7 @@ package org.amqp
     import flash.events.IOErrorEvent;
     import flash.events.ProgressEvent;
     import flash.utils.ByteArray;
-    
+
     import org.amqp.error.ConnectionError;
     import org.amqp.impl.ConnectionStateHandler;
     import org.amqp.impl.SessionImpl;
@@ -39,12 +39,12 @@ package org.amqp
         private var shuttingDown:Boolean = false;
         private var delegate:IODelegate;
         private var session0:Session;
-        private var connectionState:ConnectionState;
+        private var connectionParams:ConnectionParameters;
         public var sessionManager:SessionManager;
         public var frameMax:int = 0;
 
-        public function Connection(state:ConnectionState) {
-            connectionState = state;
+        public function Connection(state:ConnectionParameters) {
+            connectionParams = state;
             var stateHandler:ConnectionStateHandler = new ConnectionStateHandler(state);
 
             session0 = new SessionImpl(this, 0, stateHandler);
@@ -73,12 +73,12 @@ package org.amqp
         public function start():void {
             if (currentState < CONNECTING) {
                 currentState = CONNECTING;
-                delegate.open(connectionState);
+                delegate.open(connectionParams);
             }
         }
 
         public function isConnected():Boolean {
-        	return delegate.isConnected();
+          return delegate.isConnected();
         }
 
         public function onSocketConnect(event:Event):void {

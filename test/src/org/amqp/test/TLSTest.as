@@ -22,7 +22,7 @@ package org.amqp.test
 
     import flexunit.framework.TestSuite;
 
-    import org.amqp.ConnectionState;
+    import org.amqp.ConnectionParameters;
 
     public class TLSTest extends org.amqp.test.LifecycleTest
     {
@@ -37,11 +37,11 @@ package org.amqp.test
             return myTS;
         }
 
-        override public function buildConnectionState():ConnectionState {
-            var state:ConnectionState = super.buildConnectionState();
-            state.useTLS = true;
-            state.options = new TLSConfig(TLSEngine.CLIENT);
-            return state;
+        override public function buildConnectionParams():ConnectionParameters {
+            var params:ConnectionParameters = super.buildConnectionParams();
+            params.useTLS = true;
+            params.options = new TLSConfig(TLSEngine.CLIENT);
+            return params;
         }
 
     }
