@@ -126,6 +126,7 @@ package org.amqp
                 trace("Calling handleForcedShutdown from connection");
                 sessionManager.forceClose();
                 session0.forceClose();
+                delegate.dispatchEvent(new ConnectionError());
             }
         }
 
