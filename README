@@ -11,14 +11,14 @@ org.amqp.patterns.SubscribeClient
 org.amqp.patterns.RpcClient
 org.amqp.patterns.RpcServer
 
-TODO / Further exploration: 
+TODO / Further exploration:
 ---------------------------
 
-- Optimize the file size of overall library to decrease its 304kb 
-weight down to something reasonable. For one, I noticed the core 
-library depends on flexunit.swc, which weighs in at 400kb itself. 
-Perhaps looking at removing that dependency will cut some fat, in 
-particular the ArrayList class is used and should be substituted with 
+- Optimize the file size of overall library to decrease its 304kb
+weight down to something reasonable. For one, I noticed the core
+library depends on flexunit.swc, which weighs in at 400kb itself.
+Perhaps looking at removing that dependency will cut some fat, in
+particular the ArrayList class is used and should be substituted with
 something already available.
 |--> Update: the dependency is now removed - the build script just needs modification
 
@@ -36,3 +36,8 @@ to a subscribed topic (BasicProperties, userid argument might work)
 - Remove binding for a specific routing key when unsubscribing
 
 - Wildcard topics still require some testing
+
+Known Issues:
+-------------
+
+- The code generator should produce logging code that can dump the contents of each method

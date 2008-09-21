@@ -50,6 +50,10 @@ package org.amqp
         public function getMethodId():int{
             return -1;
         }
+
+        public function toString():String{
+            return "(" + getClassId() + "-" + getMethodId() + ")";
+        }
     }
 }
 

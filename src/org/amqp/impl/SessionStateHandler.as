@@ -20,9 +20,9 @@ package org.amqp.impl
     import de.polygonal.ds.ArrayedQueue;
     import de.polygonal.ds.HashMap;
     import de.polygonal.ds.PriorityQueue;
-    
+
     import flash.utils.ByteArray;
-    
+
     import org.amqp.BaseCommandReceiver;
     import org.amqp.BasicConsumer;
     import org.amqp.Command;
@@ -34,6 +34,8 @@ package org.amqp.impl
     import org.amqp.headers.BasicProperties;
     import org.amqp.headers.ChannelProperties;
     import org.amqp.headers.ConnectionProperties;
+    import org.amqp.methods.basic.Cancel;
+    import org.amqp.methods.basic.CancelOk;
     import org.amqp.methods.basic.Consume;
     import org.amqp.methods.basic.ConsumeOk;
     import org.amqp.methods.basic.Deliver;
@@ -78,6 +80,10 @@ package org.amqp.impl
             dispatch(cmd);
         }
 
+        private function cancelRpcHandler(method:Method, fun:Function):void {
+            removeEventListener(method, fun);
+        }
+
         public function dispatch(cmd:Command):void {
             switch(state) {
                 case STATE_CLOSED: { stateError(cmd.method.getClassId()); }
@@ -102,12 +108,29 @@ package org.amqp.impl
             rpc(new Command(consume), onConsumeOk);
         }
 
+        public function unregister(tag:String):void{
+            var cancel:Cancel = new Cancel();
+            cancel.consumertag = tag;
+            rpc(new Command(cancel), onCancelOk);
+        }
+
         public function onConsumeOk(event:ProtocolEvent):void {
             var consumeOk:ConsumeOk = event.command.method as ConsumeOk;
+            cancelRpcHandler(consumeOk, arguments.callee);
             var consumer:BasicConsumer = pendingConsumers.dequeue() as BasicConsumer;
             var tag:String = consumeOk.consumertag;
             consumers.insert(tag, consumer);
             consumer.onConsumeOk(tag);
+        }
+
+        public function onCancelOk(event:ProtocolEvent):void {
+            var cancelOk:CancelOk = event.command.method as CancelOk;
+            cancelRpcHandler(cancelOk, arguments.callee);
+            var tag:String = cancelOk.consumertag;
+            var consumer:BasicConsumer = consumers.remove(tag);
+            if (null != consumer) {
+                consumer.onCancelOk(tag);
+            }
         }
 
         public function onDeliver(event:ProtocolEvent):void {

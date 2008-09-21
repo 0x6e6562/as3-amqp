@@ -22,5 +22,6 @@ package org.amqp
     public interface ConsumerRegistry
     {
         function register(consume:Consume, consumer:BasicConsumer):void;
+        function unregister(tag:String):void;
     }
 }
