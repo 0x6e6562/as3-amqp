@@ -91,6 +91,7 @@ package org.amqp.test
         public function onDeliver(method:Deliver,
                                   properties:BasicProperties,
                                   body:ByteArray):void {
+            assertEquals(routing_key, method.routingkey);
             trace("onDeliver --> " + body.readUTF());
         }
 
