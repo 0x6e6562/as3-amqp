@@ -26,11 +26,14 @@ package org.amqp.test
 
     import org.amqp.BasicConsumer;
     import org.amqp.Command;
+    import org.amqp.ProtocolEvent;
     import org.amqp.headers.BasicProperties;
-    import org.amqp.methods.basic.Cancel;
     import org.amqp.methods.basic.Consume;
     import org.amqp.methods.basic.Deliver;
+    import org.amqp.methods.channel.Open;
     import org.amqp.methods.connection.OpenOk;
+    import org.amqp.methods.queue.Declare;
+    import org.amqp.methods.queue.DeclareOk;
 
     public class PublishSubscribeTest extends AbstractTest implements BasicConsumer
     {
@@ -39,6 +42,9 @@ package org.amqp.test
         public function PublishSubscribeTest(methodName:String=null)
         {
             super(methodName);
+            x = "";
+            q = "q-" + new Date().getMilliseconds();
+            routing_key = q;
         }
 
         public static function suite():TestSuite{
@@ -50,6 +56,21 @@ package org.amqp.test
         public function testPublish():void {
             connection.start();
             baseSession.addEventListener(new OpenOk(), addAsync(runPublishTest, TIMEOUT) );
+        }
+
+        override protected function openChannel():void {
+            sessionHandler = sessionManager.create();
+            var open:Open = new Open();
+            var queue:org.amqp.methods.queue.Declare = new org.amqp.methods.queue.Declare();
+            queue.queue = q;
+            sessionHandler.dispatch(new Command(open));
+            sessionHandler.dispatch(new Command(queue));
+
+            var onQueueDeclareOk:Function = function(event:ProtocolEvent):void{
+                trace("onQueueDeclareOk called");
+            };
+
+            sessionHandler.addEventListener(new DeclareOk(), addAsync(onQueueDeclareOk, TIMEOUT) );
         }
 
         public function runPublishTest(event:Event):void {
@@ -73,24 +94,27 @@ package org.amqp.test
         }
 
         public function cancel(event:TimerEvent):void {
+            trace("Initiating cancellation");
             assertNotNull(consumerTag);
-            var cancel:Cancel = new Cancel();
-            cancel.consumertag = consumerTag;
-            sessionHandler.dispatch(new Command(cancel));
+            sessionHandler.unregister(consumerTag);
         }
 
         public function onConsumeOk(tag:String):void {
             consumerTag = tag;
-            trace("onConsumeOk");
+            trace("onConsumeOk: " + tag);
         }
 
         public function onCancelOk(tag:String):void {
-            trace("onCancelOk");
+            trace("onCancelOk: " + tag);
+            var data:ByteArray = new ByteArray();
+            data.writeUTF("hello, world again");
+            publish(data);
         }
 
         public function onDeliver(method:Deliver,
                                   properties:BasicProperties,
                                   body:ByteArray):void {
+            assertEquals(routing_key, method.routingkey);
             trace("onDeliver --> " + body.readUTF());
         }
 

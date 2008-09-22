@@ -103,8 +103,9 @@ package org.amqp.methods
         /** Public API - reads a long integer argument. */
         public final function readLonglong():uint {
             clearBits();
-            //throw new Error("Not yet implemented");
-            return input.readUnsignedInt();
+            var higher:int = input.readInt();
+            var lower:int = input.readInt();
+            return lower + higher << 0x100000000;
         }
 
         /** Public API - reads a bit/boolean argument. */
