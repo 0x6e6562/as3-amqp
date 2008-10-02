@@ -79,6 +79,7 @@ package org.amqp.test
             consume.queue = q;
             consume.noack = true;
             sessionHandler.register(consume, this);
+            sessionHandler.register(consume, this);
             var data:ByteArray = new ByteArray();
             data.writeUTF("hello, world");
             publish(data);
