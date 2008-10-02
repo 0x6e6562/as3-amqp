@@ -26,5 +26,6 @@ package org.amqp
         function open(params:ConnectionParameters):void;
         function isConnected():Boolean;
         function close():void;
+        function flush():void;
     }
 }

@@ -170,6 +170,7 @@ package org.amqp
         public function sendFrame(frame:Frame):void {
             if (delegate.isConnected()) {
                 frame.writeTo(delegate);
+                delegate.flush();
                 //lastActivityTime = new Date().valueOf();
             } else {
                 throw new Error("Connection main loop not running");
