@@ -22,11 +22,13 @@ package org.amqp.patterns
     public class CorrelatedMessageEvent extends Event
     {
         public var result:*;
+        public var method:*;
 
-        public function CorrelatedMessageEvent(correlationId:String,r:*)
+        public function CorrelatedMessageEvent(correlationId:String,r:*,m:*=null)
         {
             super(correlationId, false, false);
             result = r;
+            method = m;
         }
 
     }

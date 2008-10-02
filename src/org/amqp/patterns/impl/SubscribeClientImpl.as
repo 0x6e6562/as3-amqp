@@ -17,18 +17,16 @@
  **/
 package org.amqp.patterns.impl
 {
-    import com.ericfeminella.utils.HashMap;
-    
+    import de.polygonal.ds.HashMap;
+
     import flash.events.EventDispatcher;
     import flash.utils.ByteArray;
-    
+
     import org.amqp.BasicConsumer;
     import org.amqp.Command;
     import org.amqp.Connection;
     import org.amqp.ProtocolEvent;
     import org.amqp.headers.BasicProperties;
-    import org.amqp.methods.basic.Cancel;
-    import org.amqp.methods.basic.CancelOk;
     import org.amqp.methods.basic.Consume;
     import org.amqp.methods.basic.Deliver;
     import org.amqp.methods.queue.Declare;
@@ -38,7 +36,9 @@ package org.amqp.patterns.impl
 
     public class SubscribeClientImpl extends AbstractDelegate implements SubscribeClient, BasicConsumer, Dispatcher
     {
-        private var replyQueue:String = null;
+        public var reservedExchange:Boolean;
+
+        public var replyQueue:String = null;
         private var topics:HashMap = new HashMap();
         private var dispatcher:EventDispatcher = new EventDispatcher();
         private var sendBuffer:SendBuffer;
@@ -46,6 +46,7 @@ package org.amqp.patterns.impl
         public function SubscribeClientImpl(c:Connection) {
             super(c);
             sendBuffer = new SendBuffer(this);
+            reservedExchange = false;
         }
 
         public function subscribe(key:String, callback:Function):void {
@@ -53,7 +54,7 @@ package org.amqp.patterns.impl
                 return;
             }
 
-            topics.put(key, {callback:callback, consumerTag:null});
+            topics.insert(key, {callback:callback, consumerTag:null});
 
             if (replyQueue != null) {
                 dispatch(key, null);
@@ -63,13 +64,8 @@ package org.amqp.patterns.impl
         }
 
         public function unsubscribe(key:String):void {
-            var cancel:Cancel = new Cancel();
-            var topic:* = topics.getValue(key);
-        	
-            cancel.consumertag = topic.consumerTag;
-            sessionHandler.dispatch(new Command(cancel));
-            sessionHandler.addEventListener(new org.amqp.methods.basic.CancelOk, onCancelOk);
-        	
+            var topic:* = topics.find(key);
+            sessionHandler.unregister(topic.consumerTag);
             dispatcher.removeEventListener(key, topic.callback);
             topics.remove(key);
         }
@@ -80,17 +76,19 @@ package org.amqp.patterns.impl
             consume.noack = true;
             consume.consumertag = replyQueue + ":" + o;
             sessionHandler.register(consume, this);
-        	
+
             bindQueue(exchange, replyQueue, o);
         }
 
         override protected function onChannelOpenOk(event:ProtocolEvent):void {
-            declareExchange(exchange, exchangeType);
+            if (reservedExchange == false) {
+                declareExchange(exchange, exchangeType);
+            }
             setupReplyQueue();
         }
 
         override protected function declareQueue(q:String):void {
-            var queue:org.amqp.methods.queue.Declare = new org.amqp.methods.queue.Declare();
+            var queue:Declare = new Declare();
             queue.queue = q;
             queue.autodelete = true;
             sessionHandler.dispatch(new Command(queue));
@@ -102,22 +100,46 @@ package org.amqp.patterns.impl
         }
 
         public function onConsumeOk(tag:String):void {
-    	    var key:String = tag.split(":")[1];
-    	    var topic:* = topics.getValue(key);
-    	   
-    	    topic.consumerTag = tag;
-    	    topics.put(key, topic);
-    	   
-    	    dispatcher.addEventListener(key, topic.callback);
+            var key:String = tag.split(":")[1];
+            var topic:* = topics.find(key);
+
+            topic.consumerTag = tag;
+            topics.insert(key, topic);
+
+            dispatcher.addEventListener(key, topic.callback);
         }
 
-        public function onCancelOk(tag:String):void {}
+        public function onCancelOk(tag:String):void {
+            //trace("cancelled");
+        }
 
         public function onDeliver(method:Deliver,
                                   properties:BasicProperties,
                                   body:ByteArray):void {
+
+            trace("onDeliver");
             var result:* = serializer.deserialize(body);
-            dispatcher.dispatchEvent(new CorrelatedMessageEvent(properties.correlationid, result));
+
+            var topic:String = matchTopic(properties.correlationid || method.routingkey);
+            if (topic != null) {
+                dispatcher.dispatchEvent(new CorrelatedMessageEvent(topic, result, method));
+            }
+        }
+
+        private function matchTopic(topic:String):String {
+            var pattern:String;
+
+            for each (var key:String in topics.getKeySet()) {
+                pattern = key.replace("\.", "\\.");
+                pattern = pattern.replace("*", "(.+)");
+                pattern = "^" + pattern + "$";
+
+                if (topic.search(pattern) >= 0) {
+                    return key;
+                }
+            }
+
+            return null;
         }
     }
 }

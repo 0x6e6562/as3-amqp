@@ -73,6 +73,7 @@ package org.amqp.impl
 
         public function rpc(cmd:Command, fun:Function):void {
             var method:Method = cmd.method;
+            var abc:Method = method.getResponse();
             addEventListener(method.getResponse(), fun);
             if (null != method.getAltResponse()) {
                 addEventListener(method.getAltResponse(), fun);
@@ -116,7 +117,7 @@ package org.amqp.impl
 
         public function onConsumeOk(event:ProtocolEvent):void {
             var consumeOk:ConsumeOk = event.command.method as ConsumeOk;
-            cancelRpcHandler(consumeOk, arguments.callee);
+            //cancelRpcHandler(consumeOk, arguments.callee);
             var consumer:BasicConsumer = pendingConsumers.dequeue() as BasicConsumer;
             var tag:String = consumeOk.consumertag;
             consumers.insert(tag, consumer);
@@ -125,7 +126,7 @@ package org.amqp.impl
 
         public function onCancelOk(event:ProtocolEvent):void {
             var cancelOk:CancelOk = event.command.method as CancelOk;
-            cancelRpcHandler(cancelOk, arguments.callee);
+            //cancelRpcHandler(cancelOk, arguments.callee);
             var tag:String = cancelOk.consumertag;
             var consumer:BasicConsumer = consumers.remove(tag);
             if (null != consumer) {

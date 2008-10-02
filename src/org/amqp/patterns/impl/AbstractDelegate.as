@@ -89,7 +89,7 @@ package org.amqp.patterns.impl
 
         protected function setupReplyQueue():void {
             declareQueue("");
-             sessionHandler.addEventListener(new DeclareOk(),onQueueDeclareOk);
+            sessionHandler.addEventListener(new DeclareOk(),onQueueDeclareOk);
         }
 
         protected function getReplyQueue(event:ProtocolEvent):String {
