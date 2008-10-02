@@ -17,19 +17,14 @@
  **/
 package org.amqp
 {
-    public interface Session
+    /**
+    * This is an experimental interface to attempt to decouple some entangled
+    * concerns.
+    *
+    * This will be invoked e.g. when a connection has been opened to the broker.
+    **/
+    public interface LifecycleEventHandler
     {
-        function closeGracefully():void;
-        function forceClose():void;
-        /**
-        * I think sendCommand/2 can be refactored down to sendCommand/1
-        * and hence be made more intuitive
-        */
-        function sendCommand(c:Command, fun:Function = null):void;
-        function handleFrame(frame:Frame):void;
-        function rpc(c:Command, fun:Function):void;
-        function registerLifecycleHandler(handler:LifecycleEventHandler):void
-        function emitLifecyleEvent():void;
-
+        function afterOpen():void;
     }
 }

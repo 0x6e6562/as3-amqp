@@ -51,13 +51,12 @@ package org.amqp.impl
 
         protected var state:int = STATE_CONNECTION;
         protected var QUEUE_SIZE:int = 100;
-        protected var commandQueue:PriorityQueue = new PriorityQueue(QUEUE_SIZE);
+
         protected var pendingConsumers:ArrayedQueue = new ArrayedQueue(QUEUE_SIZE);
         protected var consumers:HashMap = new HashMap();
 
         public function SessionStateHandler(){
-            addEventListener(new OpenOk(), onOpenOk);
-            addEventListener(new CloseOk(), onCloseOk);
+            // TODO Look into whether this is really necessary
             addEventListener(new Deliver(), onDeliver);
         }
 
@@ -72,12 +71,7 @@ package org.amqp.impl
         }
 
         public function rpc(cmd:Command, fun:Function):void {
-            var method:Method = cmd.method;
-            addEventListener(method.getResponse(), fun);
-            if (null != method.getAltResponse()) {
-                addEventListener(method.getAltResponse(), fun);
-            }
-            dispatch(cmd);
+            session.rpc(cmd, fun);
         }
 
         private function cancelRpcHandler(method:Method, fun:Function):void {
@@ -85,22 +79,7 @@ package org.amqp.impl
         }
 
         public function dispatch(cmd:Command):void {
-            switch(state) {
-                case STATE_CLOSED: { stateError(cmd.method.getClassId()); }
-                case STATE_CONNECTION: {
-                    if (cmd.method.getClassId() > STATE_CHANNEL) {
-                        enqueueCommand(cmd);
-                    }
-                    else {
-                        sendCommand(cmd);
-                    }
-                    break;
-                }
-                default: {
-                    flushQueue();
-                    sendCommand(cmd);
-                }
-            }
+            session.sendCommand(cmd, null);
         }
 
         public function register(consume:Consume, consumer:BasicConsumer):void{
@@ -144,7 +123,6 @@ package org.amqp.impl
 
         public function onOpenOk(event:ProtocolEvent):void {
             transition(STATE_OPEN);
-            flushQueue(-1);
         }
 
         /**
@@ -152,37 +130,6 @@ package org.amqp.impl
          **/
         public function onCloseOk(event:ProtocolEvent):void {
             transition(STATE_CONNECTION);
-        }
-
-        /**
-         * Enqueues a command in order of ascending class id.
-         **/
-        private function enqueueCommand(cmd:Command):void {
-            commandQueue.enqueue(cmd);
-        }
-
-        private function flushQueue(limit:int = -1):void {
-            var cmd:Command = commandQueue.dequeue() as Command;
-            if (null == cmd) return;
-            var classId:int = cmd.method.getClassId();
-
-            if (limit > -1) {
-                if (classId > limit) {
-                    commandQueue.enqueue(cmd);
-                }
-                else {
-                    sendCommand(cmd);
-                    flushQueue(limit);
-                }
-            }
-            else {
-                sendCommand(cmd);
-                flushQueue();
-            }
-        }
-
-        private function sendCommand(cmd:Command):void {
-            session.sendCommand(cmd);
         }
 
         /**

@@ -48,7 +48,6 @@ package org.amqp
             var stateHandler:ConnectionStateHandler = new ConnectionStateHandler(state);
 
             session0 = new SessionImpl(this, 0, stateHandler);
-            session0.addEventListener(new CloseOk(), afterGracefulClose);
             stateHandler.registerWithSession(session0);
 
             sessionManager = new SessionManager(this);

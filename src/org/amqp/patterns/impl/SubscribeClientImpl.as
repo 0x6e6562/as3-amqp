@@ -18,10 +18,10 @@
 package org.amqp.patterns.impl
 {
     import com.ericfeminella.utils.HashMap;
-    
+
     import flash.events.EventDispatcher;
     import flash.utils.ByteArray;
-    
+
     import org.amqp.BasicConsumer;
     import org.amqp.Command;
     import org.amqp.Connection;
@@ -65,12 +65,7 @@ package org.amqp.patterns.impl
         public function unsubscribe(key:String):void {
             var cancel:Cancel = new Cancel();
             var topic:* = topics.getValue(key);
-        	
-            cancel.consumertag = topic.consumerTag;
-            sessionHandler.dispatch(new Command(cancel));
-            sessionHandler.addEventListener(new org.amqp.methods.basic.CancelOk, onCancelOk);
-        	
-            dispatcher.removeEventListener(key, topic.callback);
+            sessionHandler.unregister(topic.consumerTag);
             topics.remove(key);
         }
 
@@ -80,7 +75,7 @@ package org.amqp.patterns.impl
             consume.noack = true;
             consume.consumertag = replyQueue + ":" + o;
             sessionHandler.register(consume, this);
-        	
+
             bindQueue(exchange, replyQueue, o);
         }
 
@@ -102,13 +97,13 @@ package org.amqp.patterns.impl
         }
 
         public function onConsumeOk(tag:String):void {
-    	    var key:String = tag.split(":")[1];
-    	    var topic:* = topics.getValue(key);
-    	   
-    	    topic.consumerTag = tag;
-    	    topics.put(key, topic);
-    	   
-    	    dispatcher.addEventListener(key, topic.callback);
+          var key:String = tag.split(":")[1];
+          var topic:* = topics.getValue(key);
+
+          topic.consumerTag = tag;
+          topics.put(key, topic);
+
+          dispatcher.addEventListener(key, topic.callback);
         }
 
         public function onCancelOk(tag:String):void {}

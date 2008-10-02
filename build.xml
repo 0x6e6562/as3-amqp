@@ -19,7 +19,7 @@
     <!--
         Compile code generator
     -->
-    <target name="codeGenerator" depends="properties">
+    <target name="codegen" depends="properties">
         <mkdir dir="${build.dir}"/>
         <copy todir="${build.dir}">
             <fileset dir="codegen/specs"/>
@@ -47,7 +47,7 @@
     <!--
         Compile all of the classes under the "src" tree into a .swc file
     -->
-    <target name="lib" depends="codeGenerator">
+    <target name="lib" depends="codegen">
         <java jar="${compc}" fork="true" failonerror="true">
             <classpath>
                 <fileset dir="${flexsdk.dir}/lib">

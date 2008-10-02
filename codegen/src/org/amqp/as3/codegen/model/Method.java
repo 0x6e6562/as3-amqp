@@ -16,11 +16,21 @@ public class Method {
 
     private boolean hasAltResponse = false;
 
+    private boolean bottomHalf = false;
+
     private boolean synchronous;
 
     private List<Field> fields;
 
     private Method response;
+
+    public boolean isBottomHalf() {
+        return bottomHalf;
+    }
+
+    public void setBottomHalf(boolean bottomHalf) {
+        this.bottomHalf = bottomHalf;
+    }
 
     public boolean isHasAltResponse() {
         return hasAltResponse;

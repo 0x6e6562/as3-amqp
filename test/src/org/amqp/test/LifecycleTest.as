@@ -24,18 +24,14 @@ package org.amqp.test
     import flexunit.framework.TestSuite;
 
     import org.amqp.Command;
+    import org.amqp.LifecycleEventHandler;
     import org.amqp.ProtocolEvent;
     import org.amqp.methods.channel.Close;
-    import org.amqp.methods.channel.Open;
-    import org.amqp.methods.connection.OpenOk;
-    import org.amqp.methods.exchange.Declare;
+    import org.amqp.methods.connection.Close;
     import org.amqp.methods.exchange.Delete;
-    import org.amqp.methods.queue.Bind;
-    import org.amqp.methods.queue.BindOk;
-    import org.amqp.methods.queue.Declare;
     import org.amqp.methods.queue.Delete;
 
-    public class LifecycleTest extends AbstractTest
+    public class LifecycleTest extends AbstractTest implements LifecycleEventHandler
     {
 
         public function LifecycleTest(methodName:String){
@@ -52,18 +48,20 @@ package org.amqp.test
             connection.start();
             // Deliberately call this twice to test the state handling of the connection
             connection.start();
-            baseSession.addEventListener(new OpenOk(), addAsync(afterBaseSessionOpened, TIMEOUT) );
+            connection.baseSession.registerLifecycleHandler(this);
         }
 
-        public function afterBaseSessionOpened(event:Event):void {
-            openChannel();
+        public function afterOpen():void {
+            openChannel(teardownExchange);
+            /*
             var timer:Timer = new Timer(DELAY, 1);
             timer.addEventListener(TimerEvent.TIMER, teardownExchange);
             timer.start();
-
+            */
         }
 
-        public function teardownExchange(event:Event):void {
+        public function teardownExchange(event:ProtocolEvent):void {
+            trace("teardownExchange");
 
             var queueDelete:org.amqp.methods.queue.Delete = new org.amqp.methods.queue.Delete();
             queueDelete.queue = q;
@@ -73,18 +71,12 @@ package org.amqp.test
             exchangeDelete.exchange = x;
             exchangeDelete.ifunused = false;
 
-              var onXDeleteOk:Function = function(event:ProtocolEvent):void{
-                trace("onXDeleteOk called");
-            };
-            var onQDeleteOk:Function = function(event:ProtocolEvent):void{
-                trace("onQDeleteOk called");
+            var whoCares:Function = function(event:ProtocolEvent):void{
+                trace("whoCares called");
             };
 
-            sessionHandler.addEventListener( new org.amqp.methods.queue.DeleteOk(), addAsync(onQDeleteOk, TIMEOUT));
-            sessionHandler.addEventListener( new org.amqp.methods.exchange.DeleteOk(), addAsync(onXDeleteOk, TIMEOUT));
-
-            sessionHandler.dispatch(new Command(queueDelete));
-            sessionHandler.dispatch(new Command(exchangeDelete));
+            sessionHandler.rpc(new Command(queueDelete), whoCares);//addAsync(whoCares, TIMEOUT));
+            sessionHandler.rpc(new Command(exchangeDelete), whoCares);//addAsync(whoCares, TIMEOUT));
 
             var timer:Timer = new Timer(DELAY, 1);
             timer.addEventListener(TimerEvent.TIMER, closeSession);
@@ -99,8 +91,7 @@ package org.amqp.test
                 trace("Channel closed");
                 closeConnection();
             };
-            sessionHandler.addEventListener(new org.amqp.methods.channel.CloseOk(), addAsync(fun, TIMEOUT) );
-            sessionHandler.dispatch(new Command(close));
+            sessionHandler.rpc(new Command(close), fun);//addAsync(fun, TIMEOUT));
         }
 
         public function closeConnection():void {
@@ -110,8 +101,7 @@ package org.amqp.test
             var fun:Function = function(event:ProtocolEvent):void {
                 trace("Connection closed");
             };
-            sessionHandler.addEventListener(new org.amqp.methods.connection.CloseOk(), addAsync(fun, TIMEOUT) );
-            sessionHandler.dispatch(new Command(close));
+            sessionHandler.rpc(new Command(close), fun);//addAsync(fun, TIMEOUT));
         }
 
     }
