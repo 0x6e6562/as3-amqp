@@ -17,7 +17,7 @@
  **/
 package org.amqp.patterns.impl
 {
-    import com.ericfeminella.utils.HashMap;
+    import de.polygonal.ds.HashMap;
 
     import flash.events.EventDispatcher;
     import flash.utils.ByteArray;
@@ -30,6 +30,7 @@ package org.amqp.patterns.impl
     import org.amqp.methods.basic.Consume;
     import org.amqp.methods.basic.Deliver;
     import org.amqp.methods.queue.Declare;
+    import org.amqp.methods.queue.Unbind;
     import org.amqp.patterns.CorrelatedMessageEvent;
     import org.amqp.patterns.Dispatcher;
     import org.amqp.patterns.SubscribeClient;
@@ -54,7 +55,7 @@ package org.amqp.patterns.impl
                 return;
             }
 
-            topics.insert(key, {callback:callback, consumerTag:null});
+            topics.insert(key, {callback:callback});
 
             if (replyQueue != null) {
                 dispatch(key, null);
@@ -64,20 +65,24 @@ package org.amqp.patterns.impl
         }
 
         public function unsubscribe(key:String):void {
-            var cancel:Cancel = new Cancel();
-            var topic:* = topics.getValue(key);
-            sessionHandler.unregister(topic.consumerTag);
+            var unbind:Unbind = new Unbind();
+            var topic:* = topics.find(key);
+            unbind.exchange = exchange;
+            unbind.queue = replyQueue;
+            unbind.routingkey = key;
+
+            sessionHandler.rpc(new Command(unbind), onUnbindOk);
+
+            dispatcher.removeEventListener(key, topic.callback);
             topics.remove(key);
         }
 
         public function dispatch(o:*, callback:Function):void {
-            var consume:Consume = new Consume();
-            consume.queue = replyQueue;
-            consume.noack = true;
-            consume.consumertag = replyQueue + ":" + o;
-            sessionHandler.register(consume, this);
-
             bindQueue(exchange, replyQueue, o);
+
+            var topic:* = topics.find(o);
+            topics.insert(o, topic);
+            dispatcher.addEventListener(o, topic.callback);
         }
 
         override protected function onChannelOpenOk(event:ProtocolEvent):void {
@@ -91,32 +96,30 @@ package org.amqp.patterns.impl
             var queue:Declare = new Declare();
             queue.queue = q;
             queue.autodelete = true;
-            sessionHandler.dispatch(new Command(queue));
+            sessionHandler.rpc(new Command(queue), onQueueDeclareOk);
         }
 
         override protected function onQueueDeclareOk(event:ProtocolEvent):void {
             replyQueue = getReplyQueue(event);
+
+            var consume:Consume = new Consume();
+            consume.queue = replyQueue;
+            consume.noack = true;
+            consume.consumertag = replyQueue;
+            sessionHandler.register(consume, this);
+
             sendBuffer.drain();
         }
 
-        public function onConsumeOk(tag:String):void {
-          var key:String = tag.split(":")[1];
-          var topic:* = topics.getValue(key);
+        public function onConsumeOk(tag:String):void {}
 
-          topic.consumerTag = tag;
-          topics.put(key, topic);
+        public function onCancelOk(tag:String):void {}
 
-          dispatcher.addEventListener(key, topic.callback);
-        }
-
-        public function onCancelOk(tag:String):void {
-            //trace("cancelled");
-        }
+        public function onUnbindOk(event:ProtocolEvent):void {}
 
         public function onDeliver(method:Deliver,
                                   properties:BasicProperties,
                                   body:ByteArray):void {
-
             trace("onDeliver");
             var result:* = serializer.deserialize(body);
 

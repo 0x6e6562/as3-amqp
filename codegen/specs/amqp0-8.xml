@@ -3,14 +3,14 @@
 <!--
 Copyright Notice
 ================
-© Copyright JPMorgan Chase Bank & Co., Cisco Systems, Inc., Envoy Technologies Inc.,
-iMatix Corporation, IONA� Technologies, Red Hat, Inc.,
+Â© Copyright JPMorgan Chase Bank & Co., Cisco Systems, Inc., Envoy Technologies Inc.,
+iMatix Corporation, IONAï¿½ Technologies, Red Hat, Inc.,
 TWIST Process Innovations, and 29West Inc. 2006. All rights reserved.
 
 License
 =======
 JPMorgan Chase Bank & Co., Cisco Systems, Inc., Envoy Technologies Inc., iMatix 
-Corporation, IONA� Technologies, Red Hat, Inc., TWIST Process Innovations, and 
+Corporation, IONAï¿½ Technologies, Red Hat, Inc., TWIST Process Innovations, and 
 29West Inc. (collectively, the "Authors") each hereby grants to you a worldwide,
 perpetual, royalty-free, nontransferable, nonexclusive license to
 (i) copy, display, and implement the Advanced Messaging Queue Protocol
@@ -1213,6 +1213,7 @@ localised reply text
                         / C:BIND     S:BIND-OK
                         / C:PURGE    S:PURGE-OK
                         / C:DELETE   S:DELETE-OK
+						/ C:UNBIND   S:UNBIND-OK
 </doc>
     <chassis name="server" implement="MUST"/>
     <chassis name="client" implement="MUST"/>
@@ -1588,7 +1589,52 @@ localised reply text
     </doc>
       </field>
     </method>
-    <!-- - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<!-- UNBIND - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
+	<method name="unbind" synchronous="1" index="50">
+		Unbind
+		<doc>
+		  This methods unbinds a queue
+		</doc>
+		<chassis name="server" implement="MUST"/>
+		<response name="unbind-ok"/>
+		<field name="ticket" domain="access ticket">
+			<doc>The access ticket must be for the access realm that holds the
+		    queue.</doc>
+		</field>
+		<field name="queue" domain="queue name">
+		  <doc>
+		    queue name
+		  </doc>
+		</field>
+		<field name="exchange" domain="exchange name">
+		  <doc>
+		    exchange name
+		  </doc>
+		</field>
+		<field name="routingkey" type="shortstr">
+		  <doc>
+		    routing key
+		  </doc>
+		</field>
+		<field name="arguments" type="table">
+		  <doc>
+		    additional arguments
+		  </doc>
+		</field>
+	</method>
+
+	<method name="unbind-ok" synchronous="1" index="51">
+		Unbind-ok
+		<doc>
+		  Confirms a queue unbind
+		</doc>
+		<chassis name="client" implement="MUST"/>
+	</method>
+
+    <!-- UNBIND - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - - -->
+
     <method name="delete" synchronous="1" index="40">
   delete a queue
   <doc>
