@@ -34,7 +34,6 @@ package org.amqp.test
     import org.amqp.methods.channel.Open;
     import org.amqp.methods.exchange.Declare;
     import org.amqp.methods.queue.Bind;
-    import org.amqp.methods.queue.BindOk;
     import org.amqp.util.Properties;
 
     public class AbstractTest extends TestCase
@@ -83,7 +82,7 @@ package org.amqp.test
             timer.start();
         }
 
-        protected function openChannel():void {
+        protected function openChannel(callback:Function):void {
             sessionHandler = sessionManager.create();
 
             var open:Open = new Open();
@@ -100,16 +99,14 @@ package org.amqp.test
             bind.queue = q;
             bind.routingkey = bind_key;
 
-            var onBindOk:Function = function(event:ProtocolEvent):void{
-                trace("onBindOk called");
+            var devNull:Function = function(event:ProtocolEvent):void{
+                trace("devNull called for " + event.command.method);
             };
 
-            sessionHandler.dispatch(new Command(open));
-            sessionHandler.dispatch(new Command(exchange));
-            sessionHandler.dispatch(new Command(queue));
-            sessionHandler.dispatch(new Command(bind));
-
-            sessionHandler.addEventListener(new BindOk(), addAsync(onBindOk, TIMEOUT) );
+            sessionHandler.rpc(new Command(open), devNull);
+            sessionHandler.rpc(new Command(exchange), devNull);
+            sessionHandler.rpc(new Command(queue), devNull);
+            sessionHandler.rpc(new Command(bind), callback);//addAsync(callback, TIMEOUT));
         }
     }
 }

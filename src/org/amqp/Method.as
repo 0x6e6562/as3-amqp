@@ -35,6 +35,10 @@ package org.amqp
              return false;
         }
 
+        public function isBottomHalf():Boolean {
+             return false;
+        }
+
         public function getResponse():Method {
              return null;
         }

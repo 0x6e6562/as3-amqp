@@ -25,6 +25,7 @@ package org.amqp.impl
     import org.amqp.BaseCommandReceiver;
     import org.amqp.Command;
     import org.amqp.ConnectionParameters;
+    import org.amqp.LifecycleEventHandler;
     import org.amqp.ProtocolEvent;
     import org.amqp.methods.connection.Close;
     import org.amqp.methods.connection.CloseOk;
@@ -61,8 +62,6 @@ package org.amqp.impl
 
         public function ConnectionStateHandler(params:ConnectionParameters){
             connectionParams = params;
-            addEventListener(new OpenOk(), onOpenOk);
-            addEventListener(new CloseOk(), onCloseOk);
             addEventListener(new Start(), onStart);
             addEventListener(new Tune(), onTune);
         }
@@ -82,7 +81,6 @@ package org.amqp.impl
 
         public function onCloseOk(cmd:Command):void {
             var closeOk:CloseOk = cmd.method as CloseOk;
-            //dispatchAfterCloseEvent();
             state = STATE_CLOSED;
         }
 
@@ -112,7 +110,7 @@ package org.amqp.impl
             startOk.response = new ByteArrayLongString(buf);
             startOk.locale = "en_US";
 
-            send(new Command(startOk));
+            session.sendCommand(new Command(startOk));
         }
 
         public function onTune(event:ProtocolEvent):void {
@@ -121,12 +119,12 @@ package org.amqp.impl
             tuneOk.channelmax = tune.channelmax;
             tuneOk.framemax = tune.framemax;
             tuneOk.heartbeat = tune.heartbeat;
-            send(new Command(tuneOk));
+            session.sendCommand(new Command(tuneOk));
             var open:Open = new Open();
             open.virtualhost = connectionParams.vhostpath;
             open.capabilities = "";
             open.insist = false;
-            send(new Command(open));
+            session.rpc(new Command(open), onOpenOk);
         }
 
         public function onOpenOk(event:ProtocolEvent):void {
@@ -140,6 +138,9 @@ package org.amqp.impl
                 state = STATE_OPEN;
                 //dispatchAfterOpenEvent();
             }
+
+            // Call the lifecycle event handlers
+            session.emitLifecyleEvent();
         }
 
         private function close():void {
@@ -148,11 +149,8 @@ package org.amqp.impl
             close.replytext = "Goodbye";
             close.classid = 0;
             close.methodid = 0;
-            send(new Command(close));
+            session.rpc(new Command(close), onCloseOk);
         }
 
-        private function send(cmd:Command):void {
-            session.sendCommand(cmd);
-        }
     }
 }

@@ -1,17 +1,19 @@
 package org.amqp.test
 {
-    import flash.events.Event;
     import flash.utils.ByteArray;
 
     import flexunit.framework.TestSuite;
 
     import org.amqp.Command;
+    import org.amqp.LifecycleEventHandler;
     import org.amqp.ProtocolEvent;
     import org.amqp.methods.basic.Get;
-    import org.amqp.methods.connection.OpenOk;
 
-    public class GetTest extends AbstractTest
+    public class GetTest extends AbstractTest implements LifecycleEventHandler
     {
+
+        private const testString:String = "hello, world";
+
         public function GetTest(methodName:String=null)
         {
             super(methodName);
@@ -23,15 +25,18 @@ package org.amqp.test
             return myTS;
         }
 
-        public function testGet():void {
-            connection.start();
-            baseSession.addEventListener(new OpenOk(), addAsync(runGetTest, TIMEOUT) );
+        public function afterOpen():void {
+            openChannel(runGetTest);
         }
 
-        public function runGetTest(event:Event):void {
-            openChannel();
+        public function testGet():void {
+            connection.start();
+            connection.baseSession.registerLifecycleHandler(this);
+        }
+
+        public function runGetTest(event:ProtocolEvent):void {
             var data:ByteArray = new ByteArray();
-            data.writeUTF("hello, world");
+            data.writeUTF(testString);
             publish(data);
             var _get:Get = new Get();
             _get.queue = q;
@@ -43,7 +48,9 @@ package org.amqp.test
             var data:ByteArray = event.command.content;
             data.position = 0;
             if (data.bytesAvailable > 0) {
-                trace("onGetOk ---> " + data.readUTF());
+                var msg:String = data.readUTF();
+                assertEquals(testString, msg);
+                trace("onGetOk ---> " + msg);
             }
         }
     }

@@ -120,6 +120,11 @@ override public function getAltResponse():Method {
 }
 <endif>
 
+
+override public function isBottomHalf():Boolean {
+    return <meth.bottomHalf>;
+}
+
 override public function getClassId():int{
     return <meth.amqpClass.index>;
 }
@@ -135,8 +140,14 @@ override public function writeArgumentsTo(writer:MethodArgumentWriter):void {
 override public function readArgumentsFrom(reader:MethodArgumentReader):void {
     <meth.fields:readArgs(); separator="\n">
 }
+
+public function dump():void {
+    trace("-------- <method.amqpClass.name>.<method.name> --------");
+    <meth.fields:dump(); separator="\n">
+}
 >>
 
+dump() ::= "trace(\"<it.name>: {\" + _<it.name> + \"}\");"
 
 readArgs() ::= "_<it.name> = reader.<readMap.(it.type)>();"
 

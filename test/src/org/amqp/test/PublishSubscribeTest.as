@@ -17,7 +17,6 @@
  **/
 package org.amqp.test
 {
-    import flash.events.Event;
     import flash.events.TimerEvent;
     import flash.utils.ByteArray;
     import flash.utils.Timer;
@@ -26,16 +25,15 @@ package org.amqp.test
 
     import org.amqp.BasicConsumer;
     import org.amqp.Command;
+    import org.amqp.LifecycleEventHandler;
     import org.amqp.ProtocolEvent;
     import org.amqp.headers.BasicProperties;
     import org.amqp.methods.basic.Consume;
     import org.amqp.methods.basic.Deliver;
     import org.amqp.methods.channel.Open;
-    import org.amqp.methods.connection.OpenOk;
     import org.amqp.methods.queue.Declare;
-    import org.amqp.methods.queue.DeclareOk;
 
-    public class PublishSubscribeTest extends AbstractTest implements BasicConsumer
+    public class PublishSubscribeTest extends AbstractTest implements BasicConsumer, LifecycleEventHandler
     {
         protected var consumerTag:String;
 
@@ -55,29 +53,32 @@ package org.amqp.test
 
         public function testPublish():void {
             connection.start();
-            baseSession.addEventListener(new OpenOk(), addAsync(runPublishTest, TIMEOUT) );
+            connection.baseSession.registerLifecycleHandler(this);
         }
 
-        override protected function openChannel():void {
+        public function afterOpen():void {
+            openChannel(runPublishTest);
+        }
+
+        override protected function openChannel(callback:Function):void {
+
+            var whoCares:Function = function(event:ProtocolEvent):void{
+                trace("whoCares called");
+            };
+
             sessionHandler = sessionManager.create();
             var open:Open = new Open();
             var queue:org.amqp.methods.queue.Declare = new org.amqp.methods.queue.Declare();
             queue.queue = q;
-            sessionHandler.dispatch(new Command(open));
-            sessionHandler.dispatch(new Command(queue));
-
-            var onQueueDeclareOk:Function = function(event:ProtocolEvent):void{
-                trace("onQueueDeclareOk called");
-            };
-
-            sessionHandler.addEventListener(new DeclareOk(), addAsync(onQueueDeclareOk, TIMEOUT) );
+            sessionHandler.rpc(new Command(open), whoCares);
+            sessionHandler.rpc(new Command(queue), callback);
         }
 
-        public function runPublishTest(event:Event):void {
-            openChannel();
+        public function runPublishTest(event:ProtocolEvent):void {
             var consume:Consume = new Consume();
             consume.queue = q;
             consume.noack = true;
+            sessionHandler.register(consume, this);
             sessionHandler.register(consume, this);
             var data:ByteArray = new ByteArray();
             data.writeUTF("hello, world");

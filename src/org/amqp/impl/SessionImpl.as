@@ -17,19 +17,39 @@
  **/
 package org.amqp.impl
 {
+    import de.polygonal.ds.ArrayedQueue;
+    import de.polygonal.ds.PriorityQueue;
+
+    import flash.events.EventDispatcher;
+
     import org.amqp.Command;
     import org.amqp.CommandReceiver;
     import org.amqp.Connection;
     import org.amqp.Frame;
+    import org.amqp.LifecycleEventHandler;
     import org.amqp.Method;
     import org.amqp.Session;
 
     public class SessionImpl implements Session
     {
+        protected var QUEUE_SIZE:int = 100;
+
         private var connection:Connection;
         private var channel:int;
         private var commandReceiver:CommandReceiver;
         private var currentCommand:Command;
+
+        private var dispatcher:EventDispatcher = new EventDispatcher();
+
+        /**
+        * I'm not too happy about this new RPC queue - the whole queueing
+        * thing needs a complete refactoring so that RPCs are executed serially
+        * but also so that different intra-class RPC order is guaranteed.
+        */
+        //protected var rpcQueue:PriorityQueue = new PriorityQueue(QUEUE_SIZE);
+        protected var rpcQueue:ArrayedQueue = new ArrayedQueue(QUEUE_SIZE);
+
+        private var lifecycleHandlers:Array = new Array();
 
         public function SessionImpl(con:Connection, ch:int, receiver:CommandReceiver) {
             connection = con;
@@ -43,13 +63,70 @@ package org.amqp.impl
             }
             currentCommand.handleFrame(frame);
             if (currentCommand.isComplete()) {
+                /**
+                * The idea is that this callback will always be invoked when a command is
+                * to be processed by the session handler, so it can kick off the dequeuing
+                * of any pending RPCs in addition to dispatching to the target callback handler,
+                * which is implemented in the super class.
+                */
                 commandReceiver.receive(currentCommand);
+                if (currentCommand.method.isBottomHalf()) {
+                    rpcBottomHalf();
+                }
                 currentCommand = new Command();
             }
         }
 
-        public function sendCommand(cmd:Command):void {
+        public function registerLifecycleHandler(handler:LifecycleEventHandler):void {
+            lifecycleHandlers.push(handler);
+        }
+
+        public function emitLifecyleEvent():void {
+            for (var i:uint = 0; i < lifecycleHandlers.length; i++) {
+                (lifecycleHandlers[i] as LifecycleEventHandler).afterOpen();
+            }
+        }
+
+        /**
+        * The logic behind this is that a non-null fun signifies an RPC,
+        * if the fun is null, then it is an asynchronous command.
+        */
+        public function sendCommand(cmd:Command, fun:Function = null):void {
+
+            if (null != fun) {
+                if (rpcQueue.isEmpty()) {
+                    send(cmd);
+                }
+                rpcQueue.enqueue({command:cmd,callback:fun});
+            }
+            else {
+                send(cmd);
+            }
+        }
+
+        private function send(cmd:Command):void {
             cmd.transmit(channel, connection);
+        }
+
+        public function rpc(cmd:Command, fun:Function):void {
+            var method:Method = cmd.method;
+            commandReceiver.addEventListener(method.getResponse(), fun);
+            if (null != method.getAltResponse()) {
+                commandReceiver.addEventListener(method.getAltResponse(), fun);
+            }
+            sendCommand(cmd, fun);
+            //trace("RPC top half: " + cmd.method);
+        }
+
+        private function rpcBottomHalf():void {
+            if (!rpcQueue.isEmpty()) {
+                rpcQueue.dequeue();
+                if (!rpcQueue.isEmpty()) {
+                    var o:Object = rpcQueue.peek();
+                    //trace("RPC bottom half: " + o.command.method);
+                    send(o.command);
+                }
+            }
         }
 
         public function closeGracefully():void {
@@ -60,12 +137,5 @@ package org.amqp.impl
             commandReceiver.forceClose();
         }
 
-        public function addEventListener(method:Method, fun:Function):void {
-            commandReceiver.addEventListener(method, fun);
-        }
-
-        public function removeEventListener(method:Method, fun:Function):void {
-            commandReceiver.removeEventListener(method, fun);
-        }
     }
 }

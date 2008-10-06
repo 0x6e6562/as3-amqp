@@ -21,23 +21,22 @@ package org.amqp.patterns.impl
 
     import org.amqp.Command;
     import org.amqp.Connection;
+    import org.amqp.LifecycleEventHandler;
     import org.amqp.ProtocolEvent;
     import org.amqp.headers.BasicProperties;
     import org.amqp.impl.SessionStateHandler;
     import org.amqp.methods.basic.Publish;
     import org.amqp.methods.channel.Open;
-    import org.amqp.methods.connection.OpenOk;
     import org.amqp.methods.exchange.Declare;
     import org.amqp.methods.queue.Bind;
     import org.amqp.methods.queue.DeclareOk;
     import org.amqp.patterns.Serializer;
     import org.amqp.util.Properties;
 
-    public class AbstractDelegate
+    public class AbstractDelegate implements LifecycleEventHandler
     {
         public var exchange:String;
         public var exchangeType:String;
-        public var realm:String;
         public var connection:Connection;
 
         public var serializer:Serializer;
@@ -47,14 +46,16 @@ package org.amqp.patterns.impl
         public function AbstractDelegate(c:Connection) {
             connection = c;
             connection.start();
-            connection.baseSession.addEventListener(new OpenOk(), openChannel);
+            connection.baseSession.registerLifecycleHandler(this);
         }
 
-        protected function openChannel(event:ProtocolEvent):void {
+        public function afterOpen():void {
+            openChannel();
+        }
+
+        protected function openChannel():void {
             sessionHandler = connection.sessionManager.create();
-            var open:Open = new Open();
-            sessionHandler.dispatch(new Command(open));
-            sessionHandler.addEventListener(new org.amqp.methods.channel.OpenOk(), onChannelOpenOk);
+            sessionHandler.rpc(new Command(new Open()), onChannelOpenOk);
         }
 
         protected function publish(x:String, routing_key:String, data:ByteArray, properties:BasicProperties = null):void {
@@ -70,13 +71,13 @@ package org.amqp.patterns.impl
             var exchange:org.amqp.methods.exchange.Declare = new org.amqp.methods.exchange.Declare();
             exchange.exchange = x;
             exchange.type = type;
-            sessionHandler.dispatch(new Command(exchange));
+            sessionHandler.rpc(new Command(exchange), onExchangeDeclareOk);
         }
 
         protected function declareQueue(q:String):void {
             var queue:org.amqp.methods.queue.Declare = new org.amqp.methods.queue.Declare();
             queue.queue = q;
-            sessionHandler.dispatch(new Command(queue));
+            sessionHandler.rpc(new Command(queue), onQueueDeclareOk);
         }
 
         protected function bindQueue(x:String,q:String, key:String):void {
@@ -84,12 +85,12 @@ package org.amqp.patterns.impl
             bind.exchange = x;
             bind.queue = q;
             bind.routingkey = key;
-            sessionHandler.dispatch(new Command(bind));
+
+            sessionHandler.rpc(new Command(bind), onQueueBindOk);
         }
 
         protected function setupReplyQueue():void {
             declareQueue("");
-            sessionHandler.addEventListener(new DeclareOk(),onQueueDeclareOk);
         }
 
         protected function getReplyQueue(event:ProtocolEvent):String {
@@ -107,6 +108,16 @@ package org.amqp.patterns.impl
          * This should be overriden by specializing classes
          **/
         protected function onQueueDeclareOk(event:ProtocolEvent):void {}
+
+        /**
+         * This should be overriden by specializing classes
+         **/
+        protected function onExchangeDeclareOk(event:ProtocolEvent):void {}
+
+        /**
+         * This should be overriden by specializing classes
+         **/
+        protected function onQueueBindOk(event:ProtocolEvent):void {}
 
     }
 }

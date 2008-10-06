@@ -295,9 +295,12 @@ public class CodeGenerator {
             if (synchronous) {
                 String response = ap4.evalXPathToString();
                 Method r = bindMethod(nav, response, clazz);
+                r.setBottomHalf(true);
                 mangleResponseMethodName(r);
                 method.setResponse(r);
             }
+
+            method.setBottomHalf(synchronous && methodName.contains("-"));
 
             methods.add(method);
         }

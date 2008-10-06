@@ -17,7 +17,7 @@
  **/
 package org.amqp.patterns.impl
 {
-    import de.polygonal.ds.HashMap;
+    import com.ericfeminella.utils.HashMap;
 
     import flash.events.EventDispatcher;
     import flash.utils.ByteArray;
@@ -64,9 +64,9 @@ package org.amqp.patterns.impl
         }
 
         public function unsubscribe(key:String):void {
-            var topic:* = topics.find(key);
+            var cancel:Cancel = new Cancel();
+            var topic:* = topics.getValue(key);
             sessionHandler.unregister(topic.consumerTag);
-            dispatcher.removeEventListener(key, topic.callback);
             topics.remove(key);
         }
 
@@ -100,13 +100,13 @@ package org.amqp.patterns.impl
         }
 
         public function onConsumeOk(tag:String):void {
-            var key:String = tag.split(":")[1];
-            var topic:* = topics.find(key);
+          var key:String = tag.split(":")[1];
+          var topic:* = topics.getValue(key);
 
-            topic.consumerTag = tag;
-            topics.insert(key, topic);
+          topic.consumerTag = tag;
+          topics.put(key, topic);
 
-            dispatcher.addEventListener(key, topic.callback);
+          dispatcher.addEventListener(key, topic.callback);
         }
 
         public function onCancelOk(tag:String):void {
