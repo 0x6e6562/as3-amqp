@@ -52,12 +52,6 @@ package org.amqp.headers
                 }
             } while (true);
             flags = acc;
-            /*
-            flags = new int[acc.size()];
-            for (int i = 0; i < flags.length; i++) {
-                flags[i] = ((Integer) acc.get(i)).intValue();
-            }
-            */
         }
 
         /**

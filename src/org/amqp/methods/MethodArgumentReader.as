@@ -55,15 +55,10 @@ package org.amqp.methods
         }
 
         public static function _readLongstr(input:IDataInput):LongString {
-            //final long contentLength = unsignedExtend(in.readInt());
             var contentLength:int = input.readInt();
             if(contentLength < int.MAX_VALUE) {
-                //final byte [] buffer = new byte[(int)contentLength];
-                //in.readFully(buffer);
-
                 var buf:ByteArray = new ByteArray();
                 input.readBytes(buf, 0, contentLength);
-
                 return new ByteArrayLongString(buf);
             }
             else {
@@ -73,8 +68,6 @@ package org.amqp.methods
 
         public static function _readShortstr(input:IDataInput):String {
             var length:int = input.readUnsignedByte();
-            //var length3:uint = input.readUnsignedInt();
-            //var length4:int = input.readShort();
             return input.readUTFBytes(length);
         }
 
@@ -114,7 +107,6 @@ package org.amqp.methods
                 bits = input.readUnsignedByte();
                 bit = 0x01;
             }
-
             var result:Boolean = (bits&bit) != 0;
             bit = bit << 1;
             return result;
@@ -133,32 +125,22 @@ package org.amqp.methods
         public static function _readTable(input:IDataInput):Map {
 
             var table:Map = new HashMap();
-            var tableLength:int = input.readInt();//unsignedExtend(in.readInt());
+            var tableLength:int = input.readInt();
 
             var tableIn:ByteArray = new ByteArray();
             input.readBytes(tableIn, 0, tableLength);
             var value:Object = null;
 
             while(tableIn.bytesAvailable > 0) {
-
                 var name:String = _readShortstr(tableIn);
                 var type:uint = tableIn.readUnsignedByte();
                 switch(type) {
                     case 83 : //'S'
                         value = _readLongstr(tableIn);
-                        //value = _readShortstr(tableIn);
                         break;
                     case 73: //'I'
                         value = tableIn.readInt();
                         break;
-                    /*
-                    case 68: //'D':
-                        var scale:int = tableIn.readUnsignedByte();
-                        byte [] unscaled = new byte[4];
-                        tableIn.readFully(unscaled);
-                        value = new BigDecimal(new BigInteger(unscaled), scale);
-                        break;
-                        */
                     case 84: //'T':
                         value = _readTimestamp(tableIn);
                         break;
@@ -187,7 +169,6 @@ package org.amqp.methods
             var date:Date = new Date();
             date.setTime(input.readInt() * 1000)
             return date;
-            //return new Date(in.readLong() * 1000);
         }
 
         /** Public API - reads an timestamp argument. */
@@ -195,7 +176,5 @@ package org.amqp.methods
             clearBits();
             return _readTimestamp(input);
         }
-
-
     }
 }

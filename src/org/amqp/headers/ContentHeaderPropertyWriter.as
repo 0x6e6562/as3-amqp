@@ -110,10 +110,8 @@ package org.amqp.headers
         }
 
         public function ___writeLongstr(x:LongString):void {
-
                 outBytes.writeInt(x.length());
                 outBytes.writeBytes(x.getBytes(),0,0);
-
         }
 
         /** Protected API - Writes a short integer value to the stream, if it's non-null */
@@ -125,9 +123,7 @@ package org.amqp.headers
 
         /** Protected API - Writes a short integer value to the stream, if it's non-null */
         public function _writeShort(x:int):void {
-
                 outBytes.writeShort(x);
-
         }
 
         /** Protected API - Writes an integer value to the stream, if it's non-null */
@@ -138,8 +134,7 @@ package org.amqp.headers
         }
 
         public function _writeLong(x:int):void {
-
-                outBytes.writeInt(x);
+            outBytes.writeInt(x);
         }
 
         /** Protected API - Writes a long integer value to the stream, if it's non-null */
@@ -150,9 +145,7 @@ package org.amqp.headers
         }
 
         public function _writeLonglong(x:uint):void {
-
-                outBytes.writeUnsignedInt(x);
-
+            outBytes.writeUnsignedInt(x);
         }
 
         /** Protected API - Writes a table value to the stream, if it's non-null */
@@ -180,18 +173,6 @@ package org.amqp.headers
                     _writeOctet(73); // 'I'
                     _writeShort(value as int);
                 }
-                /*
-                else if(value is BigDecimal) {
-                    writeOctet(68); // 'D'
-                    BigDecimal decimal = (BigDecimal)value;
-                    writeOctet(decimal.scale());
-                    BigInteger unscaled = decimal.unscaledValue();
-                    if(unscaled.bitLength() > 32) //Integer.SIZE in Java 1.5
-                        throw new IllegalArgumentException
-                            ("BigDecimal too large to be encoded");
-                    writeLong(decimal.unscaledValue().intValue());
-                }
-                */
                 else if(value is Date) {
                     _writeOctet(84);//'T'
                     _writeTimestamp(value as Date);
@@ -220,8 +201,7 @@ package org.amqp.headers
         }
 
         public function _writeOctet(x:int):void {
-
-                outBytes.writeByte(x);
+            outBytes.writeByte(x);
         }
 
         /** Protected API - Writes a timestamp value to the stream, if it's non-null */
@@ -232,9 +212,7 @@ package org.amqp.headers
         }
 
         public function _writeTimestamp(x:Date):void {
-
-                outBytes.writeInt(x.time / 1000);
-
+            outBytes.writeInt(x.time / 1000);
         }
     }
 }

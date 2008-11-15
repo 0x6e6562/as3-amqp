@@ -14,6 +14,9 @@ org.amqp.patterns.RpcServer
 TODO / Further exploration:
 ---------------------------
 
+- The shutdown handling is probably not inline with the protocol.
+  (Look into the LifecycleTest to see how the connection is being closed)
+
 - Optimize the file size of overall library to decrease its 304kb
 weight down to something reasonable. For one, I noticed the core
 library depends on flexunit.swc, which weighs in at 400kb itself.

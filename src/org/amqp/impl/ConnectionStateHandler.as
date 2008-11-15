@@ -129,16 +129,12 @@ package org.amqp.impl
 
         public function onOpenOk(event:ProtocolEvent):void {
             var openOk:OpenOk = event.command.method as OpenOk;
-            // Maybe do something with the knownhosts?
-            //openOk.knownhosts;
             if (state == STATE_CLOSE_REQUESTED) {
                 close();
             }
             else {
                 state = STATE_OPEN;
-                //dispatchAfterOpenEvent();
             }
-
             // Call the lifecycle event handlers
             session.emitLifecyleEvent();
         }
@@ -151,6 +147,5 @@ package org.amqp.impl
             close.methodid = 0;
             session.rpc(new Command(close), onCloseOk);
         }
-
     }
 }

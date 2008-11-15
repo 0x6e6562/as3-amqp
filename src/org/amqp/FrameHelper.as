@@ -24,13 +24,11 @@ package org.amqp
     {
          public static function shortStrSize(str:String):int{
             return str.length + 1;
-            //str.getBytes("utf-8").length + 1;
         }
 
         /** Computes the AMQP wire-protocol length of a protocol-encoded long string. */
         public static function longStrSize(str:String):int {
             return str.length + 4;
-            //str.getBytes("utf-8").length + 4;
         }
 
         public static function tableSize(table:Map):int{
@@ -52,11 +50,6 @@ package org.amqp
                 else if(value is int) {
                     acc += 4;
                 }
-                /*
-                else if(value is BigDecimal) {
-                    acc += 5;
-                }
-                */
                 else if(value is Date) {
                     acc += 8;
                 }

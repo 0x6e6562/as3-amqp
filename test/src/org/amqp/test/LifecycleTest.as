@@ -53,11 +53,6 @@ package org.amqp.test
 
         public function afterOpen():void {
             openChannel(teardownExchange);
-            /*
-            var timer:Timer = new Timer(DELAY, 1);
-            timer.addEventListener(TimerEvent.TIMER, teardownExchange);
-            timer.start();
-            */
         }
 
         public function teardownExchange(event:ProtocolEvent):void {
@@ -75,8 +70,8 @@ package org.amqp.test
                 trace("whoCares called");
             };
 
-            sessionHandler.rpc(new Command(queueDelete), whoCares);//addAsync(whoCares, TIMEOUT));
-            sessionHandler.rpc(new Command(exchangeDelete), whoCares);//addAsync(whoCares, TIMEOUT));
+            sessionHandler.rpc(new Command(queueDelete), whoCares);
+            sessionHandler.rpc(new Command(exchangeDelete), whoCares);
 
             var timer:Timer = new Timer(DELAY, 1);
             timer.addEventListener(TimerEvent.TIMER, closeSession);
@@ -89,9 +84,10 @@ package org.amqp.test
             close.replytext = "Goodbye";
             var fun:Function = function(event:ProtocolEvent):void {
                 trace("Channel closed");
-                closeConnection();
+                // TODO Look into how the connection shutdown is being handled
+                //closeConnection();
             };
-            sessionHandler.rpc(new Command(close), fun);//addAsync(fun, TIMEOUT));
+            sessionHandler.rpc(new Command(close), fun);
         }
 
         public function closeConnection():void {
@@ -101,7 +97,7 @@ package org.amqp.test
             var fun:Function = function(event:ProtocolEvent):void {
                 trace("Connection closed");
             };
-            sessionHandler.rpc(new Command(close), fun);//addAsync(fun, TIMEOUT));
+            sessionHandler.rpc(new Command(close), fun);
         }
 
     }

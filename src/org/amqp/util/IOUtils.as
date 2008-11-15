@@ -23,7 +23,6 @@ package org.amqp.util
     public class IOUtils
     {
         public static function copy(input:ByteArray, output:IDataOutput):void {
-
             output.writeBytes(input);
         }
     }

@@ -149,7 +149,6 @@ package org.amqp
                 var frame:Frame = parseFrame(delegate);
                 maybeSendHeartbeat();
                 if (frame != null) {
-                    // missedHeartbeats = 0;
                         if (frame.type == AMQP.FRAME_HEARTBEAT) {
                             // just ignore this for now
                         } else if (frame.channel == 0) {
@@ -173,7 +172,6 @@ package org.amqp
             if (delegate.isConnected()) {
                 frame.writeTo(delegate);
                 delegate.flush();
-                //lastActivityTime = new Date().valueOf();
             } else {
                 throw new Error("Connection main loop not running");
             }

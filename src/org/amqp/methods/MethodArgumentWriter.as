@@ -63,11 +63,8 @@ package org.amqp.methods
         /** Public API - encodes a short string argument. */
         public final function writeShortstr(str:String):void {
             bitflush();
-            //byte [] bytes = str.getBytes("utf-8");
-
             var buf:ByteArray = new ByteArray();
             buf.writeUTFBytes(str);
-
             output.writeByte(buf.length);
             output.writeBytes(buf, 0, 0);
         }
@@ -82,7 +79,6 @@ package org.amqp.methods
         /** Public API - encodes a long string argument from a String. */
         public final function writeString(str:String):void {
             bitflush();
-            //byte [] bytes = str.getBytes("utf-8");
             writeLong(str.length);
             output.writeUTFBytes(str);
         }
@@ -96,18 +92,12 @@ package org.amqp.methods
         /** Public API - encodes an integer argument. */
         public final function writeLong(l:int):void {
             bitflush();
-            // java's arithmetic on this type is signed, however its
-            // reasonable to use ints to represent the unsigned long
-            // type - for values < Integer.MAX_VALUE everything works
-            // as expected
             output.writeInt(l);
         }
 
         /** Public API - encodes a long integer argument. */
         public final function writeLonglong(ll:int):void {
             throw new Error("No longs in Actionscript");
-            //bitflush();
-            //output.writeInt(ll);
         }
 
         /** Public API - encodes a boolean/bit argument. */
@@ -127,10 +117,8 @@ package org.amqp.methods
 
         /** Public API - encodes a table argument. */
         public final function writeTable(table:Map):void {
-
             bitflush();
             if (table == null) {
-                // Convenience.
                 output.writeInt(0);
             } else {
                 output.writeInt( FrameHelper.tableSize(table) );
@@ -138,7 +126,6 @@ package org.amqp.methods
                 for (var key:String in table) {
                     writeShortstr(key);
                     var value:Object = table.getValue(key);
-
                     if(value is String) {
                         writeOctet(83); // 'S'
                         writeString(value as String);
@@ -151,18 +138,6 @@ package org.amqp.methods
                         writeOctet(73); // 'I'
                         writeShort(value as int);
                     }
-                    /*
-                    else if(value is BigDecimal) {
-                        writeOctet(68); // 'D'
-                        BigDecimal decimal = (BigDecimal)value;
-                        writeOctet(decimal.scale());
-                        BigInteger unscaled = decimal.unscaledValue();
-                        if(unscaled.bitLength() > 32) //Integer.SIZE in Java 1.5
-                            throw new IllegalArgumentException
-                                ("BigDecimal too large to be encoded");
-                        writeLong(decimal.unscaledValue().intValue());
-                    }
-                    */
                     else if(value is Date) {
                         writeOctet(84);//'T'
                         writeTimestamp(value as Date);
@@ -192,7 +167,6 @@ package org.amqp.methods
 
         /** Public API - encodes a timestamp argument. */
         public final function writeTimestamp(timestamp:Date):void {
-            // AMQP uses POSIX time_t which is in seconds since the epoc
             writeLonglong( timestamp.valueOf() / 1000);
         }
 
@@ -202,7 +176,6 @@ package org.amqp.methods
          */
         public function flush():void {
             bitflush();
-            //output.flush();
         }
     }
 }

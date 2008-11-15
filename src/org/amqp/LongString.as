@@ -22,27 +22,8 @@ package org.amqp
 
     public interface LongString
     {
-
         function length():int;
-
-        /**
-         * Get the content stream.
-         * Repeated calls to this function return the same stream,
-         * which may not support rewind.
-         * @return An input stream the reads the content
-         * @throws IOException
-         */
         function getStream():IDataInput;
-
-        /**
-         * Get the content as a byte array.
-         * Repeated calls to this function return the same array.
-         * This function will fail if getContentLength() > Integer.MAX_VALUE
-         * throwing an IllegalStateException.
-         * @return the content as an array
-         * @throws IOException
-         */
         function getBytes():ByteArray;
-
     }
 }

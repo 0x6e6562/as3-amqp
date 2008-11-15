@@ -41,12 +41,6 @@ package org.amqp.impl
 
         private var dispatcher:EventDispatcher = new EventDispatcher();
 
-        /**
-        * I'm not too happy about this new RPC queue - the whole queueing
-        * thing needs a complete refactoring so that RPCs are executed serially
-        * but also so that different intra-class RPC order is guaranteed.
-        */
-        //protected var rpcQueue:PriorityQueue = new PriorityQueue(QUEUE_SIZE);
         protected var rpcQueue:ArrayedQueue = new ArrayedQueue(QUEUE_SIZE);
 
         private var lifecycleHandlers:Array = new Array();
@@ -115,7 +109,6 @@ package org.amqp.impl
                 commandReceiver.addEventListener(method.getAltResponse(), fun);
             }
             sendCommand(cmd, fun);
-            //trace("RPC top half: " + cmd.method);
         }
 
         private function rpcBottomHalf():void {
@@ -123,7 +116,6 @@ package org.amqp.impl
                 rpcQueue.dequeue();
                 if (!rpcQueue.isEmpty()) {
                     var o:Object = rpcQueue.peek();
-                    //trace("RPC bottom half: " + o.command.method);
                     send(o.command);
                 }
             }

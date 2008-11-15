@@ -95,7 +95,6 @@ package org.amqp
             if (accumulator != null) {
                 payload.writeBytes(accumulator,0,accumulator.bytesAvailable);
                 payload.position = 0;
-
                 accumulator = null;
             }
         }
@@ -106,14 +105,9 @@ package org.amqp
         public function writeTo(os:IDataOutput):void{
             finishWriting();
             os.writeByte(type);
-            //os.writeByte(0);
             os.writeShort(channel);
             os.writeInt(payload.length);
-            //accumulator.position = 0;
-            //trace("ba = " + accumulator.length);
-            //os.writeInt(accumulator.length);
             os.writeBytes(payload);
-            //os.writeBytes(accumulator, 0, accumulator.bytesAvailable);
             os.writeByte(AMQP.FRAME_END);
         }
 
