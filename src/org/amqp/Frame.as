@@ -25,10 +25,13 @@ package org.amqp
     public class Frame
     {
 
+        public var complete:Boolean = false;
+        public var headerComplete:Boolean = false;
         public var type:uint;
         public var channel:int;
         protected var payload:ByteArray;
         protected var accumulator:ByteArray;
+        protected var payloadSize:int
 
         public function Frame() {
             this.payload = new ByteArray();
@@ -37,23 +40,36 @@ package org.amqp
 
         public function readFrom(input:IDataInput):Boolean {
 
+	  if (!headerComplete) {
+	    // wait till we've got enough data in the buffer to read the header
+	    if (input.bytesAvailable < 8) return false;
+
+
             type = input.readUnsignedByte();
 
             if (type == 'A' as uint) {
                 /* Probably an AMQP.... header indicating a version mismatch. */
                 /* Otherwise meaningless, so try to read the version, and
-                 * throw an exception, whether we read the version okay or
+        we         * throw an exception, whether we read the version okay or
                  * not. */
                 protocolVersionMismatch(input);
             }
 
             channel = input.readUnsignedShort();
-            var payloadSize:int = input.readInt();
+	    payloadSize = input.readInt();
 
-            if (payloadSize > 0) {
-                payload = new ByteArray();
-                input.readBytes(payload, 0, payloadSize);
-            }
+	    if (payloadSize > 0) {
+	      payload = new ByteArray();
+	    }
+
+	    headerComplete = true;
+	  }
+
+
+	  if (payloadSize > 0 && payload.length < payloadSize) {
+	    input.readBytes(payload, payload.length, Math.min(input.bytesAvailable,payloadSize - payload.length));
+	    if (payload.length < payloadSize) return false;
+	  }
 
             accumulator = null;
 
@@ -62,9 +78,9 @@ package org.amqp
             if (frameEndMarker != AMQP.FRAME_END) {
                 throw new MalformedFrameError("Bad frame end marker: " + frameEndMarker);
             }
-
-            return true;
-        }
+	    complete = true;
+	    return true;
+	}
 
         private function protocolVersionMismatch(input:IDataInput):void {
 
