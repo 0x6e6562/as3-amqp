@@ -44,13 +44,12 @@ package org.amqp
 	    // wait till we've got enough data in the buffer to read the header
 	    if (input.bytesAvailable < 8) return false;
 
-
             type = input.readUnsignedByte();
 
             if (type == 'A' as uint) {
                 /* Probably an AMQP.... header indicating a version mismatch. */
-                /* Otherwise meaningless, so try to read the version, and
-        we         * throw an exception, whether we read the version okay or
+                /* Otherwise meaningless, so try to read the version, and we
+                 * throw an exception, whether we read the version okay or
                  * not. */
                 protocolVersionMismatch(input);
             }
@@ -71,15 +70,17 @@ package org.amqp
 	    if (payload.length < payloadSize) return false;
 	  }
 
-            accumulator = null;
+          accumulator = null;
 
+          if (input.bytesAvailable > 0) {
             var frameEndMarker:int = input.readUnsignedByte();
+          }
 
-            if (frameEndMarker != AMQP.FRAME_END) {
-                throw new MalformedFrameError("Bad frame end marker: " + frameEndMarker);
-            }
-	    complete = true;
-	    return true;
+          if (frameEndMarker != AMQP.FRAME_END) {
+            throw new MalformedFrameError("Bad frame end marker: " + frameEndMarker);
+          }
+          complete = true;
+          return true;
 	}
 
         private function protocolVersionMismatch(input:IDataInput):void {

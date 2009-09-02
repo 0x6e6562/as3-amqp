@@ -43,7 +43,7 @@ package org.amqp
         public var sessionManager:SessionManager;
         public var frameMax:int = 0;
 
-        private var frame:Frame = new Frame();
+        private var currentFrame:Frame = new Frame();
 
         public function Connection(state:ConnectionParameters) {
             connectionParams = state;
@@ -148,28 +148,28 @@ package org.amqp
          **/
         public function onSocketData(event:Event):void {
             while (delegate.isConnected() && delegate.bytesAvailable > 0) {
-                var f:Frame = parseFrame(delegate);
-		if (f == null) return;
-		if (f.type == AMQP.FRAME_HEARTBEAT) {
-		  // just ignore this for now
-		} else if (f.channel == 0) {
-		  session0.handleFrame(f);
-		} else {
-		  var session:Session = sessionManager.lookup(f.channel);
-		  session.handleFrame(f);
-		}
+                var frame:Frame = parseFrame(delegate);
+                if (frame == null) return;
+                if (frame.type == AMQP.FRAME_HEARTBEAT) {
+                  // just ignore this for now
+                } else if (frame.channel == 0) {
+                    session0.handleFrame(frame);
+                } else {
+                    var session:Session = sessionManager.lookup(frame.channel);
+                    session.handleFrame(frame);
+                }
             }
-	    maybeSendHeartbeat();
+            maybeSendHeartbeat();
         }
 
         private function parseFrame(delegate:IODelegate):Frame {
-	  frame.readFrom(delegate);
-	  if (frame.complete) {
-	    var f:Frame = frame;
-	    frame = new Frame();
-	    return f;
-	  }
-	  return null;
+ 	    currentFrame.readFrom(delegate);
+            if (currentFrame.complete) {
+	        var frame:Frame = currentFrame;
+                currentFrame = new Frame();
+                return frame;
+            }
+            return null;
         }
 
         public function sendFrame(frame:Frame):void {
