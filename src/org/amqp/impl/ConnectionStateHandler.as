@@ -123,7 +123,7 @@ package org.amqp.impl
             var open:Open = new Open();
             open.virtualhost = connectionParams.vhostpath;
             open.capabilities = "";
-            open.insist = false;
+            open.insist = connectionParams.insist;
             session.rpc(new Command(open), onOpenOk);
         }
 
