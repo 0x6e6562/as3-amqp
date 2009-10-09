@@ -116,7 +116,7 @@ package org.amqp.patterns.impl
             var queue:Declare = new Declare();
             queue.queue = q;
             queue.autodelete = true;
-            sessionHandler.dispatch(new Command(queue));
+            sessionHandler.rpc(new Command(queue), onQueueDeclareOk);
         }
 
         override protected function onQueueDeclareOk(event:ProtocolEvent):void {
