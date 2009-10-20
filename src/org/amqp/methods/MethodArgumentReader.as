@@ -126,6 +126,7 @@ package org.amqp.methods
 
             var table:Map = new HashMap();
             var tableLength:int = input.readInt();
+            if (tableLength == 0) return table; // readBytes(tableIn,0,0) reads ALL bytes
 
             var tableIn:ByteArray = new ByteArray();
             input.readBytes(tableIn, 0, tableLength);

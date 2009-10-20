@@ -23,7 +23,7 @@ package org.amqp
         public var password:String;
         public var serverhost:String;
         public var vhostpath:String;
-
+        public var insist:Boolean=true;
         public var serverport:int = AMQP.PORT;
 
         public var useTLS:Boolean = false;

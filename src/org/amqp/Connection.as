@@ -43,6 +43,8 @@ package org.amqp
         public var sessionManager:SessionManager;
         public var frameMax:int = 0;
 
+        private var currentFrame:Frame = new Frame();
+
         public function Connection(state:ConnectionParameters) {
             connectionParams = state;
             var stateHandler:ConnectionStateHandler = new ConnectionStateHandler(state);
@@ -147,25 +149,27 @@ package org.amqp
         public function onSocketData(event:Event):void {
             while (delegate.isConnected() && delegate.bytesAvailable > 0) {
                 var frame:Frame = parseFrame(delegate);
-                maybeSendHeartbeat();
-                if (frame != null) {
-                        if (frame.type == AMQP.FRAME_HEARTBEAT) {
-                            // just ignore this for now
-                        } else if (frame.channel == 0) {
-                            session0.handleFrame(frame);
-                        } else {
-                            var session:Session = sessionManager.lookup(frame.channel);
-                            session.handleFrame(frame);
-                        }
+                if (frame == null) return;
+                if (frame.type == AMQP.FRAME_HEARTBEAT) {
+                  // just ignore this for now
+                } else if (frame.channel == 0) {
+                    session0.handleFrame(frame);
                 } else {
-                    handleSocketTimeout();
+                    var session:Session = sessionManager.lookup(frame.channel);
+                    session.handleFrame(frame);
                 }
             }
+            maybeSendHeartbeat();
         }
 
         private function parseFrame(delegate:IODelegate):Frame {
-            var frame:Frame = new Frame();
-            return frame.readFrom(delegate) ? frame : null;
+ 	    currentFrame.readFrom(delegate);
+            if (currentFrame.complete) {
+	        var frame:Frame = currentFrame;
+                currentFrame = new Frame();
+                return frame;
+            }
+            return null;
         }
 
         public function sendFrame(frame:Frame):void {
