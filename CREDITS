@@ -1,3 +1,4 @@
-Alexey Slynko   - Contributed the ant script
-Peter Kieltyka  - Contributed the Pub/Sub client abstractions
-Gary Tsang      - Fixed bug in the RpcClient
+Alexey Slynko       - Contributed the ant script
+Peter Kieltyka      - Contributed the Pub/Sub client abstractions
+Gary Tsang          - Fixed bug in the RpcClient
+Joost Diepenmaat    - Fixes to the header reading part of the frame decoding
