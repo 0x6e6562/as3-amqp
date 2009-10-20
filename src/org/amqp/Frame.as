@@ -55,20 +55,20 @@ package org.amqp
             }
 
             channel = input.readUnsignedShort();
-	    payloadSize = input.readInt();
+        payloadSize = input.readInt();
 
-	    if (payloadSize > 0) {
-	      payload = new ByteArray();
-	    }
+        if (payloadSize > 0) {
+            payload = new ByteArray();
+        }
 
-	    headerComplete = true;
-	  }
+        headerComplete = true;
+      }
 
 
-	  if (payloadSize > 0 && payload.length < payloadSize) {
-	    input.readBytes(payload, payload.length, Math.min(input.bytesAvailable,payloadSize - payload.length));
-	    if (payload.length < payloadSize) return false;
-	  }
+      if (payloadSize > 0 && payload.length < payloadSize) {
+        input.readBytes(payload, payload.length, Math.min(input.bytesAvailable,payloadSize - payload.length));
+        if (payload.length < payloadSize) return false;
+      }
 
           accumulator = null;
 
@@ -81,7 +81,7 @@ package org.amqp
           }
           complete = true;
           return true;
-	}
+    }
 
         private function protocolVersionMismatch(input:IDataInput):void {
 
