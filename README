@@ -4,6 +4,39 @@ AS3-AMQP Library
 
 This library provides a high level and a low level AMQP interface for AS3.
 
+Note that you cannot just compile this library using Flash Builder! You need to use the provided
+Apache Ant build script to generate classes first.
+
+If you're new to Ant, here's how you do this:
+
+1. Download and install Apache Ant. (These instructions are being written using Ant version 1.7.1.)
+
+2. Ensure that the ANT_HOME/bin directory is on your PATH.
+
+3. Edit the build.properties file to specify the Flex SDK directory to use.
+
+4. Run the build script by typing ant in the main directory of this project. You will see messages like this:
+
+$ ant
+Buildfile: build.xml
+
+properties:
+
+codegen:
+    [mkdir] Created dir: /some_directory_name/as3-amqp/build
+     [copy] Copying 4 files to /some_directory_name/as3-amqp/build
+    [javac] Compiling 5 source files to /some_directory_name/as3-amqp/build
+
+lib:
+     [java] Loading configuration file /Applications/Adobe Flash Builder Beta 2/sdks/3.4.1/frameworks/flex-config.xml
+     [java] /some_directory_name/as3-amqp/bin/amqp.swc (291129 bytes)
+
+BUILD SUCCESSFUL
+Total time: 8 seconds
+
+5. With this completed, you can use the project by either using the .swc file or by building the generated code in Flash Builder if you prefer.
+
+
 High Level Interfaces:
 ----------------------
 org.amqp.patterns.PublishClient
