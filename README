@@ -1,6 +1,7 @@
 AS3-AMQP Library
 ==========================================================================
 
+2013/0925 Updated for amqp 0.91
 
 This library provides a high level and a low level AMQP interface for AS3.
 

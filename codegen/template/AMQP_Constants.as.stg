@@ -39,6 +39,10 @@ package org.amqp
             buffer.writeByte(PROTOCOL_MINOR);
             return buffer;
         }
+		
+		public static function toString():String {
+			return "AMQP "+PROTOCOL_MAJOR+"."+PROTOCOL_MINOR+"."+PROTOCOL_REVISION;
+		}
     }
 }
 >>

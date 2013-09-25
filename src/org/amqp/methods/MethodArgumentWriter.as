@@ -18,10 +18,10 @@
 package org.amqp.methods
 {
     import com.ericfeminella.utils.Map;
-
+    
     import flash.utils.ByteArray;
     import flash.utils.IDataOutput;
-
+    
     import org.amqp.FrameHelper;
     import org.amqp.LongString;
     import org.amqp.error.IllegalArgumentError;
@@ -134,10 +134,18 @@ package org.amqp.methods
                         writeOctet(83); // 'S'
                         writeLongstr(value as LongString);
                     }
+					else if (value is Boolean) {
+						writeOctet(116);//'t'
+						output.writeBoolean(value);
+					}	
                     else if(value is int) {
                         writeOctet(73); // 'I'
                         writeShort(value as int);
                     }
+					else if(value is Number) {
+						writeOctet(100);//'d'
+						output.writeDouble(value as Number);
+					}
                     else if(value is Date) {
                         writeOctet(84);//'T'
                         writeTimestamp(value as Date);
@@ -147,7 +155,9 @@ package org.amqp.methods
                         writeTable(value as Map);
                     }
                     else if (value == null) {
-                        throw new Error("Value for key {" + key + "} was null");
+						//corresponding 'read' is 'V' :
+						writeOctet(86);
+                     //   throw new Error("Value for key {" + key + "} was null");
                     }
                     else {
                         throw new IllegalArgumentError
@@ -158,7 +168,8 @@ package org.amqp.methods
             }
 
         }
-
+				
+		
         /** Public API - encodes an octet argument from an int. */
         public final function writeOctet(octet:int):void {
             bitflush();
@@ -167,6 +178,7 @@ package org.amqp.methods
 
         /** Public API - encodes a timestamp argument. */
         public final function writeTimestamp(timestamp:Date):void {
+			
             writeLonglong( timestamp.valueOf() / 1000);
         }
 

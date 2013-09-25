@@ -12,6 +12,7 @@
         Have you edit the properties file to make sure the paths are right oo your system?
     -->
     <target name="properties">
+         <echo>properties</echo>
         <fail unless="asdoc">The "asdoc" property must be set in build.properties.</fail>
         <fail unless="compc">The "compc" property must be set in build.properties.</fail>
     </target>
@@ -20,12 +21,15 @@
         Compile code generator
     -->
     <target name="codegen" depends="properties">
+         <echo>codegen</echo>
+        <echo>${basedir}</echo>
+         <echo>${build.dir}</echo>
         <mkdir dir="${build.dir}"/>
         <copy todir="${build.dir}">
             <fileset dir="codegen/specs"/>
             <fileset dir="codegen/template"/>
         </copy>
-        <javac srcdir="codegen/src" destdir="${build.dir}" failonerror="true">
+        <javac srcdir="codegen/src" destdir="${build.dir}" failonerror="true" includeantruntime="false">
             <compilerarg value="-Xlint:all"/> 
             <classpath>
                 <fileset dir="codegen/lib">
@@ -33,7 +37,7 @@
                 </fileset>
             </classpath>
         </javac>
-        <java classname="org.amqp.as3.codegen.CodeGenerator" failonerror="true">
+        <java classname="org.amqp.as3.codegen.CodeGenerator" failonerror="true"  fork="true" dir="${basedir}"  >
             <classpath>
                 <pathelement path="${build.dir}"/>
                 <fileset dir="codegen/lib">
@@ -48,6 +52,7 @@
         Compile all of the classes under the "src" tree into a .swc file
     -->
     <target name="lib" depends="codegen">
+        <echo>lib</echo>
         <java jar="${compc}" fork="true" failonerror="true">
             <classpath>
                 <fileset dir="${flexsdk.dir}/lib">

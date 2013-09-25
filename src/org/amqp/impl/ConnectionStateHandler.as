@@ -122,8 +122,11 @@ package org.amqp.impl
             session.sendCommand(new Command(tuneOk));
             var open:Open = new Open();
             open.virtualhost = connectionParams.vhostpath;
-            open.capabilities = "";
-            open.insist = connectionParams.insist;
+			//the following are settings for deprecated params
+        //    open.capabilities = "";
+			open.reserved1="";
+         //   open.insist = connectionParams.insist;
+			open.reserved2=connectionParams.insist;
             session.rpc(new Command(open), onOpenOk);
         }
 

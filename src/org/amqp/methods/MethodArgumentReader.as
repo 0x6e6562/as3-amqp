@@ -17,13 +17,15 @@
  **/
 package org.amqp.methods
 {
-    import flash.utils.IDataInput;
-    import flash.utils.ByteArray;
-    import com.ericfeminella.utils.Map;
     import com.ericfeminella.utils.HashMap;
+    import com.ericfeminella.utils.Map;
+    
+    import flash.utils.ByteArray;
+    import flash.utils.IDataInput;
+    
     import org.amqp.LongString;
-    import org.amqp.impl.ByteArrayLongString;
     import org.amqp.error.MalformedFrameError;
+    import org.amqp.impl.ByteArrayLongString;
 
     public class MethodArgumentReader
     {
@@ -65,6 +67,19 @@ package org.amqp.methods
                 throw new Error("Very long strings not currently supported");
             }
         }
+		
+		public static function _readBytes(input:IDataInput):ByteArray {
+			var contentLength:int = input.readInt();
+			if(contentLength < int.MAX_VALUE) {
+				var buf:ByteArray = new ByteArray();
+				input.readBytes(buf, 0, contentLength);
+				return buf;
+			}
+			else {
+				throw new Error("Very long bytearrays not currently supported");
+			}
+		}
+		
 
         public static function _readShortstr(input:IDataInput):String {
             var length:int = input.readUnsignedByte();
@@ -148,6 +163,40 @@ package org.amqp.methods
                     case 70: //'F':
                         value = _readTable(tableIn);
                         break;
+					case 68: //'D' Big Decimal
+						
+						throw new Error("BigDecimal not yet implemented on this platform");
+						
+						break;
+					case 98 : //'b'
+			                value = tableIn.readByte();
+			                break;
+					case 100 : //'d'
+			                value = tableIn.readDouble();
+			                break;
+		            case 102 : //'f'
+			                value = tableIn.readFloat();
+			                break;
+		            case 108 : //'l'
+			               // value = tableIn.readLong();
+							//this might be dubious... but is the same as readLongLong
+							var higher:int = tableIn.readInt();
+							var lower:int = tableIn.readInt();
+							value =  lower + higher << 0x100000000;
+							
+			                break;
+		            case 115 : //'s'
+			                value = tableIn.readShort();
+			                break;
+		            case 116 : //'t'
+			                value = tableIn.readBoolean();
+			                break;
+		            case 120: //'x'
+			                value = _readBytes(tableIn);
+			                break;
+		            case 86: //'V'
+			                value = null;
+			                break;
                     default:
                         throw new MalformedFrameError("Unrecognised type in table");
                 }
@@ -158,6 +207,9 @@ package org.amqp.methods
 
             return table;
         }
+		
+		
+
 
         /** Public API - reads an octet argument. */
         public final function readOctet():int{
