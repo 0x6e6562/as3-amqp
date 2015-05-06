@@ -29,7 +29,6 @@ package org.amqp
     import org.amqp.impl.SessionImpl;
     import org.amqp.io.SocketDelegate;
     import org.amqp.io.TLSDelegate;
-    import org.amqp.methods.connection.CloseOk;
 
     public class Connection implements LifecycleEventHandler
     {
@@ -43,6 +42,7 @@ package org.amqp
         private var session0:Session;
         private var connectionParams:ConnectionParameters;
         private var serverHeartbeatTimer:Timer;
+        private var clientHeartbeatTimer:Timer;
         public var sessionManager:SessionManager;
         public var frameMax:int = 0;
 
@@ -176,8 +176,14 @@ package org.amqp
 
         public function sendFrame(frame:Frame):void {
             if (delegate.isConnected()) {
+                if (clientHeartbeatTimer) {
+                    clientHeartbeatTimer.reset();
+                }
                 frame.writeTo(delegate);
                 delegate.flush();
+                if (clientHeartbeatTimer) {
+                    clientHeartbeatTimer.start();
+                }
             } else {
                 throw new Error("Connection main loop not running");
             }
@@ -193,15 +199,25 @@ package org.amqp
 
         public function afterOpen():void {
             if (connectionParams.heartbeat != 0) {
+                // Configure the server heartbeat timer to go off if (heartbeat * 2) seconds have elapsed since the server's last transmission
                 serverHeartbeatTimer = new Timer(connectionParams.heartbeat * 2 * 1000, 0);
                 serverHeartbeatTimer.addEventListener(TimerEvent.TIMER, onServerHeartbeatTimer);
                 serverHeartbeatTimer.start();
+
+                // Configure the client heartbeat timer to go off if (heartbeat) seconds have elapsed since the client's last transmission 
+                clientHeartbeatTimer = new Timer(connectionParams.heartbeat * 1000, 0);
+                clientHeartbeatTimer.addEventListener(TimerEvent.TIMER, onClientHeartbeatTimer);
+                clientHeartbeatTimer.start();
             }
         }
 
         private function onServerHeartbeatTimer(event:TimerEvent):void {
             trace("Timeout waiting to receive heartbeat from server");
             handleForcedShutdown();
+        }
+
+        private function onClientHeartbeatTimer(event:TimerEvent):void {
+            sendFrame(new Heartbeat());
         }
     }
 }
