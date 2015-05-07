@@ -20,16 +20,17 @@ package org.amqp
     import flash.events.Event;
     import flash.events.IOErrorEvent;
     import flash.events.ProgressEvent;
+    import flash.events.TimerEvent;
     import flash.utils.ByteArray;
+    import flash.utils.Timer;
 
     import org.amqp.error.ConnectionError;
     import org.amqp.impl.ConnectionStateHandler;
     import org.amqp.impl.SessionImpl;
     import org.amqp.io.SocketDelegate;
     import org.amqp.io.TLSDelegate;
-    import org.amqp.methods.connection.CloseOk;
 
-    public class Connection
+    public class Connection implements LifecycleEventHandler
     {
         private static const CLOSED:int = 0;
         private static const CONNECTING:int = 1;
@@ -40,6 +41,8 @@ package org.amqp
         private var delegate:IODelegate;
         private var session0:Session;
         private var connectionParams:ConnectionParameters;
+        private var serverHeartbeatTimer:Timer;
+        private var clientHeartbeatTimer:Timer;
         public var sessionManager:SessionManager;
         public var frameMax:int = 0;
 
@@ -50,6 +53,7 @@ package org.amqp
             var stateHandler:ConnectionStateHandler = new ConnectionStateHandler(state);
 
             session0 = new SessionImpl(this, 0, stateHandler);
+            session0.registerLifecycleHandler(this);
             stateHandler.registerWithSession(session0);
 
             sessionManager = new SessionManager(this);
@@ -114,13 +118,6 @@ package org.amqp
             delegate.close();
         }
 
-        /**
-         * Socket timeout waiting for a frame. Maybe missed heartbeat.
-         **/
-        public function handleSocketTimeout():void {
-            handleForcedShutdown();
-        }
-
         private function handleForcedShutdown():void {
             if (!shuttingDown) {
                 shuttingDown = true;
@@ -128,6 +125,12 @@ package org.amqp
                 sessionManager.forceClose();
                 session0.forceClose();
                 delegate.close();
+                if (serverHeartbeatTimer != null) {
+                    serverHeartbeatTimer.stop();
+                }
+                if (clientHeartbeatTimer != null) {
+                    clientHeartbeatTimer.stop();
+                }
                 delegate.dispatchEvent(new ConnectionError());
             }
         }
@@ -139,6 +142,12 @@ package org.amqp
                 sessionManager.closeGracefully();
                 session0.closeGracefully();
                 delegate.close();
+                if (serverHeartbeatTimer != null) {
+                    serverHeartbeatTimer.stop();
+                }
+                if (clientHeartbeatTimer != null) {
+                    clientHeartbeatTimer.stop();
+                }
             }
         }
 
@@ -147,11 +156,14 @@ package org.amqp
          * by a frame handler.
          **/
         public function onSocketData(event:Event):void {
+            if (serverHeartbeatTimer) {
+                serverHeartbeatTimer.reset();
+            }
             while (delegate.isConnected() && delegate.bytesAvailable > 0) {
                 var frame:Frame = parseFrame(delegate);
                 if (frame == null) return;
                 if (frame.type == AMQP.FRAME_HEARTBEAT) {
-                  // just ignore this for now
+                  // We've already reset the server heartbeat timer so there's nothing to be done here
                 } else if (frame.channel == 0) {
                     session0.handleFrame(frame);
                 } else {
@@ -159,7 +171,9 @@ package org.amqp
                     session.handleFrame(frame);
                 }
             }
-            maybeSendHeartbeat();
+            if (serverHeartbeatTimer) {
+                serverHeartbeatTimer.start();
+            }
         }
 
         private function parseFrame(delegate:IODelegate):Frame {
@@ -174,8 +188,14 @@ package org.amqp
 
         public function sendFrame(frame:Frame):void {
             if (delegate.isConnected()) {
+                if (clientHeartbeatTimer) {
+                    clientHeartbeatTimer.reset();
+                }
                 frame.writeTo(delegate);
                 delegate.flush();
+                if (clientHeartbeatTimer) {
+                    clientHeartbeatTimer.start();
+                }
             } else {
                 throw new Error("Connection main loop not running");
             }
@@ -189,7 +209,27 @@ package org.amqp
             delegate.removeEventListener(type, listener);
         }
 
-        private function maybeSendHeartbeat():void {}
-    }
+        public function afterOpen():void {
+            if (connectionParams.heartbeat != 0) {
+                // Configure the server heartbeat timer to go off if (heartbeat * 2) seconds have elapsed since the server's last transmission
+                serverHeartbeatTimer = new Timer(connectionParams.heartbeat * 2 * 1000, 0);
+                serverHeartbeatTimer.addEventListener(TimerEvent.TIMER, onServerHeartbeatTimer);
+                serverHeartbeatTimer.start();
 
+                // Configure the client heartbeat timer to go off if (heartbeat) seconds have elapsed since the client's last transmission 
+                clientHeartbeatTimer = new Timer(connectionParams.heartbeat * 1000, 0);
+                clientHeartbeatTimer.addEventListener(TimerEvent.TIMER, onClientHeartbeatTimer);
+                clientHeartbeatTimer.start();
+            }
+        }
+
+        private function onServerHeartbeatTimer(event:TimerEvent):void {
+            trace("Timeout waiting to receive heartbeat from server");
+            handleForcedShutdown();
+        }
+
+        private function onClientHeartbeatTimer(event:TimerEvent):void {
+            sendFrame(new Heartbeat());
+        }
+    }
 }

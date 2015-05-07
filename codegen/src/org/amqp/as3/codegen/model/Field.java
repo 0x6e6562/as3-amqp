@@ -1,5 +1,6 @@
 package org.amqp.as3.codegen.model;
 
+
 public class Field {
 
     private String[] name;
@@ -19,6 +20,8 @@ public class Field {
     }
 
     public void setName(String[] name) {
-        this.name = name;
+    //	String nameCheck = name.toString().replace("-", "__");
+    //	if (nameCheck!=name.toString()) System.out.println("Field_setName:"+nameCheck);
+        this.name = name;//nameCheck.split("");
     }
 }

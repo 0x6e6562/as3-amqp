@@ -11,7 +11,17 @@ import java.io.*;
 import java.util.*;
 
 import com.ximpleware.*;
+import org.antlr.stringtemplate.StringTemplate;
+import org.antlr.stringtemplate.StringTemplateGroup;
+import org.antlr.stringtemplate.language.AngleBracketTemplateLexer;
+import org.apache.commons.io.IOUtils;
+import org.amqp.as3.codegen.model.*;
+import org.treebind.Util;
 
+import java.io.*;
+import java.util.*;
+
+import com.ximpleware.*;
 public class CodeGenerator {
 
     private static String baseDir = "src/org/amqp";
@@ -28,6 +38,10 @@ public class CodeGenerator {
      * @throws Exception
      */
     public static void main(String[] a) throws Exception {
+    	 String current = new java.io.File( "." ).getCanonicalPath();
+         System.out.println("Current dir:"+current);
+         String currentDir = System.getProperty("user.dir");
+         System.out.println("Current dir using System:" +currentDir);
         generateAS3();
 
     }
@@ -45,8 +59,8 @@ public class CodeGenerator {
 
     private static void generateAS3() throws Exception {
 
-        VTDNav nav = buildNavigation("amqp0-8.xml");
-
+        //VTDNav nav = buildNavigation("amqp0-9-1.xml");
+		VTDNav nav = buildNavigation("amqp0-9-1.stripped.xml");
         domains = bindDomains(nav);
 
         List<AMQPClass> classes = bindClasses(nav);
@@ -86,6 +100,7 @@ public class CodeGenerator {
         StringTemplateGroup constantsGroup = new StringTemplateGroup(new InputStreamReader(is), AngleBracketTemplateLexer.class);
         StringTemplate constantsClass = constantsGroup.getInstanceOf("class");
         constantsClass.setAttribute("constants", constants);
+        System.out.println("bindConstants");
         writeFile(baseDir, "AMQP", constantsClass.toString());
     }
 
@@ -99,10 +114,44 @@ public class CodeGenerator {
 
     private static List<Constant> bindConstants(VTDNav nav) throws Exception {
         List<Constant> constants = new ArrayList<Constant>();
-
+System.out.println("bindConstants");
         AutoPilot ap0 = new AutoPilot();
         AutoPilot ap1 = new AutoPilot();
         AutoPilot ap2 = new AutoPilot();
+        ap0.selectXPath("/amqp");
+        ap1.selectXPath("@major");
+        ap2.selectXPath("@minor");
+        
+        ap0.bind(nav);
+        ap1.bind(nav);
+        ap2.bind(nav);
+        
+        if (ap0.evalXPath() != -1) {
+        	 Constant major = new Constant();
+             major.setName("protocol major");
+             major.setValue((int) ap1.evalXPathToNumber());
+             constants.add(major);
+             Constant minor = new Constant();
+             minor.setName("protocol minor");
+             minor.setValue((int) ap2.evalXPathToNumber());
+             constants.add(minor);
+             ap1.selectXPath("@port");
+             ap2.selectXPath("@revision");
+             Constant port = new Constant();
+             port.setName("port");
+             port.setValue((int) ap1.evalXPathToNumber());
+             constants.add(port);
+             Constant revision = new Constant();
+             revision.setName("protocol revision");
+             revision.setValue((int) ap2.evalXPathToNumber());
+             constants.add(revision);
+        	
+        	
+        	
+        	
+        }
+        
+        
 
         ap0.selectXPath("/amqp/constant");
         ap1.selectXPath("@name");
@@ -113,42 +162,11 @@ public class CodeGenerator {
 
         while (ap0.evalXPath() != -1){
             Constant constant = new Constant();
-            constant.setName(ap1.evalXPathToString());
+            
+            constant.setName(join(ap1.evalXPathToString().split("-")," "));
             constant.setValue((int) ap2.evalXPathToNumber());
             constants.add(constant);
         }
-
-        ap0.resetXPath();
-        ap1.resetXPath();
-        ap2.resetXPath();
-        AutoPilot ap3 = new AutoPilot();
-        ap0.selectXPath("/amqp");
-        ap1.selectXPath("@major");
-        ap2.selectXPath("@minor");
-        ap3.selectXPath("@port");
-
-        ap0.bind(nav);
-        ap1.bind(nav);
-        ap2.bind(nav);
-        ap3.bind(nav);
-
-        // TODO This is hardcoded
-
-        //while (ap0.evalXPath() != -1){
-            Constant major = new Constant();
-            major.setName("protocol major");
-            major.setValue(8);
-            constants.add(major);
-            Constant minor = new Constant();
-            minor.setName("protocol minor");
-            minor.setValue(0);
-            constants.add(minor);
-            Constant port = new Constant();
-            port.setName("port");
-            port.setValue(5672);
-            constants.add(port);
-        //}
-
 
 
         return constants;
@@ -214,7 +232,8 @@ public class CodeGenerator {
             AutoPilot apN2 = new AutoPilot();
             apN0.selectXPath("field");
             apN1.selectXPath("@name");
-            apN2.selectXPath("@type");
+           // apN2.selectXPath("@type");
+            apN2.selectXPath("@domain");
             apN0.bind(nav);
             apN1.bind(nav);
             apN2.bind(nav);
@@ -379,6 +398,24 @@ public class CodeGenerator {
         return fields;
     }
 
+    
+    
+    public static String join(String[] array, String cement) {
+        StringBuilder builder = new StringBuilder();
+
+        if(array == null || array.length == 0) {
+            return null;
+        }
+
+        for (String t : array) {
+            builder.append(t).append(cement);
+        }
+
+        builder.delete(builder.length() - cement.length(), builder.length());
+
+        return builder.toString();
+    }
+    
 
     /**
      * This is basically a hack because internal is a key word in AS3. 
@@ -389,6 +426,15 @@ public class CodeGenerator {
         if (field.getName()[0].equals("internal")) {
             field.setName(new String[]{"Internal"});
         }
+        
+        String fieldName = join(field.getName(),"");
+        if (fieldName.contains("-")){
+        	String alteredFieldName = Util.ToUpperCamelCase(fieldName);
+        	System.out.println(alteredFieldName);
+        	field.setName(alteredFieldName.split(""));
+        }
+        
+        
         return field;
     }
 
@@ -418,10 +464,12 @@ public class CodeGenerator {
     }
 
     private static String[] tokenize(String s) {
-        return s.split("\\s");        
+    	return s.split("-");
+      //  return s.split("\\s");        
     }
 
     private static InputStream readInputFile(String templateFile) {
+    	System.out.println("readInputFile:"+templateFile);
         InputStream is = CodeGenerator.class.getClassLoader().getResourceAsStream(templateFile);
         if (null == is) {
             throw new RuntimeException("Template file does not exist: " + templateFile);
@@ -440,6 +488,7 @@ public class CodeGenerator {
     }
 
     private static byte[] readIntoMemory(String file) throws IOException {
+    	System.out.println("readIntoMemory");
         InputStream spec = readInputFile(file);
         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
         IOUtils.copy(spec, buffer);

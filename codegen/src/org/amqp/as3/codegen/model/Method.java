@@ -102,6 +102,9 @@ public class Method {
     }
 
     public void setName(String name) {
+    //	String nameCheck = name.toString().replace("-", "__");
+    //	if (nameCheck!=name.toString()) System.out.println("method_setName:"+nameCheck);
+  //      this.name = nameCheck;
         this.name = name;
     }
 }

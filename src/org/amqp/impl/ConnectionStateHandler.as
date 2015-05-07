@@ -115,15 +115,16 @@ package org.amqp.impl
 
         public function onTune(event:ProtocolEvent):void {
             var tune:Tune = event.command.method as Tune;
+            connectionParams.heartbeat = negotiatedMaxValue(connectionParams.heartbeat, tune.heartbeat);
             var tuneOk:TuneOk = new TuneOk();
             tuneOk.channelmax = tune.channelmax;
             tuneOk.framemax = tune.framemax;
-            tuneOk.heartbeat = tune.heartbeat;
+            tuneOk.heartbeat = connectionParams.heartbeat;
             session.sendCommand(new Command(tuneOk));
             var open:Open = new Open();
             open.virtualhost = connectionParams.vhostpath;
-            open.capabilities = "";
-            open.insist = connectionParams.insist;
+            open.reserved1 = "";
+            open.reserved2 = false;
             session.rpc(new Command(open), onOpenOk);
         }
 
@@ -137,6 +138,14 @@ package org.amqp.impl
             }
             // Call the lifecycle event handlers
             session.emitLifecyleEvent();
+        }
+
+        private function negotiatedMaxValue(clientValue:int, serverValue:int):int {
+            if ((clientValue == 0) || (serverValue == 0)) {
+                return Math.max(clientValue, serverValue);
+            } else {
+                return Math.min(clientValue, serverValue);
+            }
         }
 
         private function close():void {

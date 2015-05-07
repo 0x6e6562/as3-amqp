@@ -1,6 +1,3 @@
-group AMQP_Constants_AS3;
-
-class(constants) ::= <<
 /**
  * ---------------------------------------------------------------------------
  *   Copyright (C) 2008 0x6e6562
@@ -20,31 +17,11 @@ class(constants) ::= <<
  **/
 package org.amqp
 {
-
-    import flash.utils.ByteArray;
-
-    /**
-     *   THIS IS AUTO-GENERATED CODE. DO NOT EDIT!
-     **/
-    public class AMQP
+    public class Heartbeat extends Frame
     {
-        <constants:field(); separator="\n">
-
-        public static function generateHeader():ByteArray {
-            var buffer:ByteArray = new ByteArray();
-            buffer.writeUTFBytes("AMQP");
-            buffer.writeByte(1);
-            buffer.writeByte(1);
-            buffer.writeByte(PROTOCOL_MAJOR);
-            buffer.writeByte(PROTOCOL_MINOR);
-            return buffer;
+        public function Heartbeat() {
+            type = AMQP.FRAME_HEARTBEAT;
+            channel = 0;
         }
-		
-		public static function toString():String {
-			return "AMQP "+PROTOCOL_MAJOR+"."+PROTOCOL_MINOR+"."+PROTOCOL_REVISION;
-		}
     }
 }
->>
-
-field() ::= "public static var <it.staticName>:int = <it.value>;"

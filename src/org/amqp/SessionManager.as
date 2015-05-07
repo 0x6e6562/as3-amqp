@@ -26,7 +26,7 @@ package org.amqp
     public class SessionManager
     {
         private var connection:Connection;
-        private var sessions:HashMap = new HashMap();
+        private var sessions:HashMap = new HashMap(); 
         private var nextChannel:int = 1;
 
         public function SessionManager(con:Connection) {

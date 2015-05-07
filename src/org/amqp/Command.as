@@ -69,6 +69,7 @@ package org.amqp
         private function addToContentBody(b:ByteArray):void {
             if (b != null) {
                 content.writeBytes(b,content.position,0);
+				
             }
         }
 
