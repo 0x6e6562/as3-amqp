@@ -125,6 +125,12 @@ package org.amqp
                 sessionManager.forceClose();
                 session0.forceClose();
                 delegate.close();
+                if (serverHeartbeatTimer != null) {
+                    serverHeartbeatTimer.stop();
+                }
+                if (clientHeartbeatTimer != null) {
+                    clientHeartbeatTimer.stop();
+                }
                 delegate.dispatchEvent(new ConnectionError());
             }
         }
@@ -136,6 +142,12 @@ package org.amqp
                 sessionManager.closeGracefully();
                 session0.closeGracefully();
                 delegate.close();
+                if (serverHeartbeatTimer != null) {
+                    serverHeartbeatTimer.stop();
+                }
+                if (clientHeartbeatTimer != null) {
+                    clientHeartbeatTimer.stop();
+                }
             }
         }
 
